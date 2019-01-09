@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    Ubuntu日志记录
+{% endblock %}
+
+{% block style %}
+    <style>
+        .breadcrumb-wrap .breadcrumb{background-color: #fff;}
+
+        .footer-area{padding-left: 10px; background-color: #e6e6e6; margin-top: -10px; height: 45px; line-height: 45px;
+            border-radius: 0 4px;}
+    </style>
+{% endblock %}
+
+{% block right_container %}
+    <!-- 面包屑 -->
+    <div class="breadcrumb-wrap">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'log_page' %}">审计日志</a></li>
+            <li class="active"><a href="?">Library</a></li>
+        </ol>
+    </div>
+    <div id="wrap">
+        <div class="host-info">
+            <blockquote class="layui-elem-quote">
+                <p>
+                    <b>主机名：</b> <span style="margin-right: 20px;">{{ host.name }}</span>
+                    <b>IP地址：</b> <span style="margin-right: 20px;">{{ host.ip_addr }}</span>
+                    <b>开放端口：</b> <span style="margin-right: 20px;">{{ host.port }}</span>
+                    <b>注册时间：</b> <span style="margin-right: 20px;">{{ host.date|date:'Y年m月d日' }}</span>
+                    <b>IDC机房：</b> <span>{{ host.idc.name }}</span>
+                </p>
+                <br>
+                <p>
+                    <b>该主机下所有账户：</b>
+                    {% for item in host.hosttoremoteuser_set.select_related %}
+                        <mark>{{ item.remote_user.username }}</mark>
+                    {% endfor %}
+                </p>
+            </blockquote>
+        </div>
+        <div class="table-area">
+            <table lay-filter="demo">
+                <thead>
+                <tr>
+                    <th lay-data="{type: 'checkbox', fixed: 'left'}"></th>
+                    <th lay-data="{field:'id', width:80, fixed: 'left', unresize: true, sort: true}">ID</th>
+                    <th lay-data="{field:'date'}">日期</th>
+                    <th lay-data="{field:'operator'}">操作人</th>
+                    <th lay-data="{field:'email'}">操作人邮箱</th>
+                    <th lay-data="{field:'loginAccount'}">远程登录账号</th>
+                    <th lay-data="{field:'authenticateType'}">认证方式</th>
+                    <th lay-data="{field:'logType'}">日志类型</th>
+                    <th lay-data="{field:'content'}">日志内容</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in logs %}
+                    <tr>
+                        <td></td>
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.record_date|date:"Y年m月d日" }}</td>
+                        <td>{{ request.user.name }}</td>
+                        <td><em>{{ request.user.email }}</em></td>
+                        <td>{{ item.host_to_remote_users.remote_user.username }}</td>
+                        <td>{{ item.host_to_remote_users.remote_user.get_auth_type_display }}</td>
+                        <td>{{ item.get_log_type_display }}</td>
+                        <td><b style="color: #f00;">{{ item.content }}</b></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <footer class="footer-area">
+            © 2018 AwesomeEye
+        </footer>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        (function() {
+            $(".log-page").addClass('active');
+        })();
+    </script>
+
+    <script type="text/html" id="toolbarDemo">
+        <div class="layui-btn-container form-inline">
+            <div class="search-area">
+                <input type="text" class="form-control" id="inputSuccess" placeholder="按堡垒机用户搜索">
+                <button type="submit" class="btn btn-theme" style="margin-left: 20px;">搜索</button>
+                <span style="margin: 2px 20px; display: inline-block; width: 1px; height: 30px; background-color: #bdbdbd;">h</span>
+                <input type="text" class="form-control" id="inputSuccess" placeholder="按远程主机用户搜索">
+                <button type="submit" class="btn btn-theme03" style="margin-left: 20px;">搜索</button>
+            </div>
+            <div class="log-type" style="margin-top: 20px;">
+                <div class="layui-btn-group">
+                    <button class="layui-btn layui-btn-normal">查看login类型的日志</button>
+                    <button class="layui-btn layui-btn-warm">查看cmd类型的日志</button>
+                    <button class="layui-btn layui-btn-danger">查看logout类型的日志</button>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+
+    <script>
+        layui.use('table', function(){
+            let table = layui.table;
+
+            //转换静态表格
+            table.init('demo', {
+                toolbar: '#toolbarDemo',    // 头部按钮
+                title: "主机日志记录标",
+                page: {                 // 开启分页
+                    theme: '#000',
+                    count: 15,          // 总数
+                    limits: [5, 10, 15, 20, 30, 100],
+                    limit: 5,       // 注意：请务必确保 limit 参数（默认：10）是与你服务端限定的数据条数一致
+                },
+                {#even: true,    // 隔行背景#}
+            });
+            //工具栏事件
+            table.on('toolbar(test)', function(obj){
+                let checkStatus = table.checkStatus(obj.config.id);
+                switch(obj.event){
+                    case 'getCheckData':
+                        let data1 = checkStatus.data;
+                        layer.alert(JSON.stringify(data1));
+                        break;
+                    case 'getCheckLength':
+                        let data = checkStatus.data;
+                        layer.msg('选中了：'+ data.length + ' 个');
+                        break;
+                    case 'isAll':
+                        layer.msg(checkStatus.isAll ? '全选': '未全选');
+                        break;
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+
+
+
+
+
+

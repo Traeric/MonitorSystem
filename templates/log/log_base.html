@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+
+{% block title %}
+    审计日志
+{% endblock %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/logstyle.css' %}">
+    <style>
+        #wrap {
+            display: flex;
+        }
+
+        #wrap .content {
+            flex: 1;
+            padding: 0 40px 0 0;
+            margin-top: 20px;
+        }
+
+        #wrap .operation {
+            flex: 350px 0 0;
+            margin-top: 20px;
+        }
+
+        .date-selecter {
+            position: relative;
+            margin-top: 10px;
+        }
+
+        .date-selecter input {
+            position: absolute;
+            top: 0;
+            z-index: 3;
+            width: 68px;
+            height: 16px;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .date-selecter input[name='start_time'] {
+            left: 2px;
+        }
+
+        .date-selecter input[name='end_time'] {
+            left: 82px;
+        }
+
+        .date-selecter button, abbr {
+            position: absolute;
+            top: 0;
+            z-index: 2;
+        }
+
+        .date-selecter button.start-time {
+            left: 2px;
+        }
+
+        .date-selecter button.end-time {
+            left: 82px;
+        }
+
+        .date-selecter abbr.full-time {
+            left: 162px;
+        }
+
+        .datearea span {
+            cursor: pointer;
+        }
+
+        .hover {
+            position: fixed;
+            top: 60px;
+            right: 20px;
+        }
+
+        .cheek-log {
+            color: #f00;
+        }
+
+        .cheek-log:hover {
+            color: #5cb85c;
+        }
+    </style>
+{% endblock %}
+
+{% block right_container %}
+    {% block nav %}
+        <blockquote class="layui-elem-quote" style="margin-top: 10px;"><h3>日志记录</h3></blockquote>
+    {% endblock %}
+    <div id="wrap">
+        <div class="content">
+            <div class="panel panel-info">
+                <div class="panel-heading"><h3 style="color: #fff;">Logs display area</h3></div>
+                <div class="panel-body">
+                    {% block panel-area %}
+                    {% endblock %}
+                </div>
+                <div class="panel-footer">
+                    ©2018 AwesomeEye
+                </div>
+            </div>
+        </div>
+        <div class="operation">
+            <div class="panel panel-danger operation-panel">
+                <div class="panel-heading"><h6 style="color: #fff; font-weight: 700;">操作日志</h6></div>
+                <div class="panel-body">
+                    <ul id="sortable" class="task-list ui-sortable">
+                        <li class="list-primary" style="padding-left: 0;">
+                            <form action="{% url 'log_filter' %}">
+                                <label>
+                                    <input type="text" name="filter_type" hidden value="user">
+                                </label>
+                                <div class="task-title">
+                                <span class="task-title-sp">
+                                    <label>
+                                        <input type="text" name="search_field" placeholder="通过用户名筛选日志"
+                                               class="form-control round-form">
+                                    </label>
+                                    <button type="submit" class="btn btn-theme02" style="margin-left: 20px;">筛选</button>
+                                </span>
+                                    <div class="datearea">
+                                        <span class="label label-success label-mini start fa fa-circle"></span>
+                                        <span class="label label-danger label-mini end fa fa-circle"></span>
+                                        <span class="label label-info label-mini full fa fa-circle"></span>
+                                    </div>
+                                    <div class="date-selecter">
+                                        <label>
+                                            <input type="text" name="start_time" id="user_start_time_hook" autocomplete="off">
+                                        </label>
+                                        <button class="btn btn-success btn-xs fa fa-check start-time">起始日期</button>
+
+                                        <label>
+                                            <input id="user_end_time_hook" type="text" name="end_time" autocomplete="off">
+                                        </label>
+                                        <button class="btn btn-danger btn-xs fa fa-pencil end-time">终止日期</button>
+
+                                        <abbr class="btn btn-info btn-xs fa fa-floppy-o full-time">全部日期</abbr>
+                                    </div>
+                                </div>
+                            </form>
+                        </li>
+                        <li class="list-danger">
+                            <form action="{% url 'log_filter' %}">
+                                <label>
+                                    <input type="text" name="filter_type" hidden value="host">
+                                </label>
+                                <div class="task-title">
+                                <span class="task-title-sp">
+                                    <label>
+                                        <input type="text" name="search_field" placeholder="通过主机名筛选日志"
+                                               class="form-control round-form">
+                                    </label>
+                                    <button type="submit" class="btn btn-theme03" style="margin-left: 20px;">筛选</button>
+                                </span>
+                                    <div class="datearea">
+                                        <span class="label label-success label-mini start fa fa-circle"></span>
+                                        <span class="label label-danger label-mini end fa fa-circle"></span>
+                                        <span class="label label-info label-mini full fa fa-circle"></span>
+                                    </div>
+                                    <div class="date-selecter">
+                                        <label>
+                                            <input type="text" name="start_time" id="host_start_time_hook" autocomplete="off">
+                                        </label>
+                                        <button class="btn btn-success btn-xs fa fa-check start-time">起始日期</button>
+
+                                        <label>
+                                            <input id="host_end_time_hook" type="text" name="end_time" autocomplete="off">
+                                        </label>
+                                        <button class="btn btn-danger btn-xs fa fa-pencil end-time">终止日期</button>
+
+                                        <abbr class="btn btn-info btn-xs fa fa-floppy-o full-time">全部日期</abbr>
+                                    </div>
+                                </div>
+                            </form>
+                        </li>
+                        <li class="list-success">
+                            <div class="task-title">
+                                <span class="task-title-sp">
+                                    <label>
+                                        <input type="text" name="search_by_name" placeholder="筛选主机组"
+                                               class="form-control round-form">
+                                    </label>
+                                    <button type="submit" class="btn btn-theme04" style="margin-left: 20px;">筛选</button>
+                                </span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="panel-footer">
+                    ©2018 AwesomeEye
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        (function () {
+            $(".log-page").addClass('active');
+            timeSelecter();
+        })();
+
+        /**
+         * 日志筛选
+         */
+        let functionExecutor = {
+            "span": spanFunc,
+            "abbr": abbrFunc,
+        };
+
+        // 时间选择控件
+        function timeSelecter() {
+            $('#sortable').click((event) => {
+                let e = event || window.event;
+                // 获取当前被点击的元素
+                let currentDom = e.target || e.srcElement;
+                // 执行相应的方法
+                if (Object.keys(functionExecutor).indexOf(currentDom.localName) !== -1) {
+                    functionExecutor[currentDom.localName](currentDom);
+                }
+            });
+        }
+
+        function spanFunc(currentDom) {
+            // 清空当前span的内容
+            $(currentDom).empty();
+        }
+
+        /*function buttonFunc(currentDom) {
+            // 获取筛选的内容(包括时间以及input框的内容)
+            let inputText = $(currentDom).prev().children("input").eq(0).val();
+            let dateArray = [];
+            $(currentDom).parent().next(".datearea").children("span").each((index, item) => {
+                dateArray.push($(item).html());
+            });
+            alert(dateArray);
+        }*/
+
+        function abbrFunc(currentDom) {
+            $(currentDom).parent().prev().children(".full").html("full time");
+        }
+    </script>
+    <script>
+        /**
+         * 制造悬浮效果
+         */
+        (function () {
+            onscroll = function () {
+                // 监听页面滚动
+                let top = $(window).scrollTop();
+                let operationDom = $(".operation-panel");
+                top >= 50 ? operationDom.addClass("hover") : operationDom.removeClass("hover");
+            }
+        })();
+    </script>
+    <script>
+        layui.use('laydate', function () {
+            let laydate = layui.laydate;
+
+            // 用户名筛选
+            laydate.render({
+                elem: '#user_start_time_hook', //指定元素
+                done: done,
+                theme: "#5cb85c",
+            });
+            laydate.render({
+                elem: '#user_end_time_hook', //指定元素
+                done: done,
+                theme: '#d9534f',
+            });
+            // 主机筛选
+            laydate.render({
+                elem: '#host_start_time_hook', //指定元素
+                done: done,
+                theme: "#ac92ec",
+            });
+            laydate.render({
+                elem: '#host_end_time_hook', //指定元素
+                done: done,
+                theme: '#5bc0de'
+            });
+        });
+
+        function done(value, dateObj) {
+            let dateData = {
+                value,
+                dateObj
+            };
+            // 当前被点击的元素
+            let currentDom = $(this.elem);
+            currentDom.Handle(dateData);
+        }
+
+        // 选中日期处理事件
+        $.prototype.Handle = function (dateData) {
+            // 获取到被点击的元素所在的input框所在的div
+            let divDom = $(this).parent().parent().parent();
+            let span_class = $(this).attr("id").split("_")[1];
+            $(divDom).children(".datearea").children(`.${span_class}`).html(dateData["value"]);
+        };
+    </script>
+{% endblock %}
+

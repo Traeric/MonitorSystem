@@ -1,0 +1,84 @@
+{% extends 'host_manage/batch_cmd.html' %}
+
+{% block style %}
+    {{ block.super }}
+    <style>
+        .info{padding-left: 0;}
+        .layui-input-inline{margin-top: 8px;}
+        .file-opt-area{margin-top: 10px;}
+    </style>
+{% endblock %}
+
+{% block nav %}
+    批量文件操作
+{% endblock %}
+
+
+{% block cmd_head %}
+    批量文件操作
+{% endblock %}
+
+{% block cmd_option_area %}
+    <div class="operation-area layui-form">
+        <div class="info col-lg-3 col-md-3 col-sm-3">
+            <blockquote class="layui-elem-quote">选择文件类型</blockquote>
+        </div>
+        <div class="layui-input-inline">
+            <select name="transfer_type">
+                <option value="file_upload">传送本地文件到远程</option>
+                <option value="file_download">从远程下载文件</option>
+            </select>
+        </div>
+        <hr class="layui-bg-green">
+        <div class="file-opt-area">
+            <div class="layui-upload-drag" id="file_upload">
+                <i class="layui-icon"></i>
+                <p>选择要传送的文件，点击上传，或将文件拖拽到此处</p>
+            </div>
+            <div class="layui-form layui-form-pane" style="margin-top: 10px;">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">远程目录</label>
+                    <div class="layui-input-inline" style="margin-top: 0; min-width: 300px;">
+                        <input name="username" placeholder="请输入要传送到远程主机的目录" autocomplete="off" class="layui-input" type="text">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block scopejs %}
+    <script>
+        /**
+         * cmd专属
+         */
+        (() => {
+            $(".host-manage").addClass("active");
+            $(".batch_file").addClass("active");
+        })();
+    </script>
+{% endblock %}
+
+
+{% block js %}
+    {{ block.super }}
+    <!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+    <script>
+        layui.use('upload', function(){
+            let upload = layui.upload;
+            // 设定文件大小限制
+            upload.render({
+                elem: '#file_upload'
+                ,url: '/upload/'
+                ,size: 1024 * 1024       // 限制文件大小，单位 KB, 允许1GB
+                ,auto: false            // 选择文件后不自动上传
+                ,bindAction: '#testListAction' // 指向一个按钮触发上传
+                ,exts: "*"
+                ,done: function(res){
+                    console.log(res)
+                }
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Dashboard">
+    <meta name="keyword" content="Dashboard, Bootstrap, Admin, Template, Theme, Responsive, Fluid, Retina">
+
+    <title>堡垒机锁屏界面</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="{% static 'plugins/bootstrap/css/bootstrap.css' %}" rel="stylesheet">
+    <!--external css-->
+    <link href="{% static 'css/font-awesome.css' %}" rel="stylesheet" />
+
+    <!-- Custom styles for this template -->
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body onload="getTime()">
+
+<!-- **********************************************************************************************************************************************************
+MAIN CONTENT
+*********************************************************************************************************************************************************** -->
+
+<div class="container">
+
+    <div id="showtime"></div>
+    <div class="col-lg-4 col-lg-offset-4">
+        <div class="lock-screen">
+            <h2><a data-toggle="modal" href="#myModal"><i class="fa fa-lock"></i></a></h2>
+            <p>UNLOCK</p>
+
+            <!-- Modal -->
+            <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="myModal" class="modal fade">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title">Welcome Back</h4>
+                        </div>
+                        <div class="modal-body">
+                            <p class="centered"><img class="img-circle" width="80" src="{% static 'images/ui-sam.jpg' %}"></p>
+                            <div id="err_hook" style="color: #f00;"></div>
+                            <input id="password_hook" type="password" name="password" placeholder="Password" autocomplete="off" class="form-control placeholder-no-fix">
+                        </div>
+                        <div class="modal-footer centered">
+                            <button data-dismiss="modal" class="btn btn-theme04" type="button">Cancel</button>
+                            <button class="btn btn-theme03" type="button" onclick="unlock()">Login</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- modal -->
+
+        </div><! --/lock-screen -->
+    </div><!-- /col-lg-4 -->
+
+</div><!-- /container -->
+
+<!-- js placed at the end of the document so the pages load faster -->
+<script src="{% static 'js/jquery.js' %}"></script>
+<script src="{% static 'plugins/bootstrap/js/bootstrap.min.js' %}"></script>
+
+<!--BACKSTRETCH-->
+<!-- You can use an image of whatever size. This script will stretch to fit in any screen size.-->
+<script type="text/javascript" src="{% static 'js/jquery.backstretch.min.js' %}"></script>
+<script>
+    function unlock() {
+        // 获取密码
+        let password = $("#password_hook").val();
+        // 获取登录邮箱
+        let email = "{{ email }}";
+        // 验证登录
+        let cookies = document.cookie;
+        let csrfArray = /csrftoken=[\w\d]+/.exec(cookies);
+        $.ajax({
+            url: '{% url "login" %}',
+            type: "post",
+            data: {"username": email, "password": password, "login_type": "unlock"},
+            headers: {"X-CSRFToken": csrfArray[0].split("=")[1]},
+            success(args) {
+                if (args.length > 26) {
+                    // 登录成功跳转
+                    location.href = "{% url 'dashboard' %}";
+                } else {
+                    // 登录失败
+                    $("#err_hook").html(args);
+                }
+            },
+        });
+    }
+</script>
+
+<script>
+    $.backstretch("{% static 'images/login-bg.jpg' %}", {speed: 500});
+</script>
+
+<script>
+    function getTime()
+    {
+        var today=new Date();
+        var h=today.getHours();
+        var m=today.getMinutes();
+        var s=today.getSeconds();
+        // add a zero in front of numbers<10
+        m=checkTime(m);
+        s=checkTime(s);
+        document.getElementById('showtime').innerHTML=h+":"+m+":"+s;
+        t=setTimeout(function(){getTime()},500);
+    }
+
+    function checkTime(i)
+    {
+        if (i<10)
+        {
+            i="0" + i;
+        }
+        return i;
+    }
+</script>
+</body>
+</html>

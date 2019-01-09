@@ -1,0 +1,51 @@
+{% extends 'log/log_base.html' %}
+
+{% block style %}
+    {{ block.super }}
+    <style>
+        .breadcrumb-wrap .breadcrumb{background-color: #fff;}
+        .title{color: #606060; font-weight: 700; font-size: 18px;}
+    </style>
+{% endblock %}
+
+
+{% block nav %}
+    <div class="breadcrumb-wrap">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'log_page' %}">审计日志</a></li>
+            <li class="active"><a href="?">筛选日志</a></li>
+        </ol>
+    </div>
+{% endblock %}
+
+{% block panel-area %}
+    {% if filter_type == 'user' %}
+        <p><span class="title">堡垒机用户：</span> {{ search_field|capfirst }}</p>
+    {% elif filter_type == 'host' %}
+        <p><span class="title">主机：</span> {{ search_field|capfirst }}</p>
+    {% endif %}
+    <p><span class="title">日志范围：</span> {{ start_time|date:'Y年m月d日' }} - {{ end_time|date:'Y年m月d日' }}</p>
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;"></fieldset>
+    <ul class="layui-timeline">
+        {% for log in log_obj %}
+            <li class="layui-timeline-item">
+                <i class="layui-icon layui-timeline-axis"></i>
+                <div class="layui-timeline-content layui-text">
+                    <h3 class="layui-timeline-title">{{ log.record_date|date:'Y年m月d日' }}</h3>
+                    <p>
+                        <b>主机： </b><span>{{ log.host_to_remote_users.host.name }}</span>
+                        <br>
+                        <b>登录使用的用户： </b><span>{{ log.host_to_remote_users.remote_user.username }}</span>
+                        <br>
+                        <b>认证方式： </b><span>{{ log.host_to_remote_users.remote_user.get_auth_type_display }}</span>
+                        <br>
+                        <b>日志类型： </b><span>{{ log.get_log_type_display }}</span>
+                        <br>
+                        <b>日志内容： </b><b style="color: #f00;">{{ log.content }}</b>
+                    </p>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{# title #}
+{% block title %}
+    WEB SSH
+{% endblock %}
+
+{% block style %}
+    <style>
+        #wrap{margin: 60px auto; width: 90%; height: 680px;}
+        #wrap .panel-body{height: 92%;}
+        #wrap .panel-body .frame{width: 100%; height: 100%;}
+    </style>
+{% endblock %}
+
+{% block right_container %}
+    <blockquote class="layui-elem-quote" style="margin-top: 10px;"><h3>WEB SSH <span class="label label-info">Connect</span></h3></blockquote>
+    <div id="wrap" class="panel panel-primary">
+        <div class="panel-heading"><h4>SSH连接</h4></div>
+        <div class="panel-body">
+            <iframe class="frame" src="http://{{ ip }}:{{ port }}" frameborder="0"></iframe>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script>
+        (function() {
+            $(".web-ssh").addClass("active");
+        })();
+    </script>
+{% endblock %}
+

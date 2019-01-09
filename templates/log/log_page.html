@@ -1,0 +1,65 @@
+{% extends 'log/log_base.html' %}
+{% load monitor_tags %}
+
+
+
+{% block panel-area %}
+    <div class="col-md-12">
+        <ul class="timeline">
+            {% for host in hosts %}
+                {% if forloop.counter0|remainder:2 == 0 %}
+                    <li>
+                        {% else %}
+                    <li class="timeline-inverted">
+                {% endif %}
+            {% if forloop.counter0|remainder:6 == 0 %}
+                <div class="timeline-badge">
+                    <i class="fa fa-thumbs-up"></i>
+                </div>
+            {% elif forloop.counter0|remainder:6 == 1 %}
+                <div class="timeline-badge warning">
+                    <i class="fa fa-th"></i>
+                </div>
+            {% elif forloop.counter0|remainder:6 == 2 %}
+                <div class="timeline-badge danger">
+                    <i class="fa fa-credit-card"></i>
+                </div>
+            {% elif forloop.counter0|remainder:6 == 3 %}
+                <div class="timeline-badge primary">
+                    <i class="fa fa-thumb-tack"></i>
+                </div>
+            {% elif forloop.counter0|remainder:6 == 4 %}
+                <div class="timeline-badge info">
+                    <i class="fa fa-floppy-o"></i>
+                </div>
+            {% elif forloop.counter0|remainder:6 == 5 %}
+                <div class="timeline-badge success">
+                    <i class="fa fa-th-large"></i>
+                </div>
+            {% endif %}
+            <div class="timeline-panel">
+                <div class="timeline-heading">
+                    <h3 class="timeline-title">{{ host.name }}</h3>
+                    <p>Register at: <small style="color: #73CAEF;">{{ host.date|date:"Y年m月d日" }}</small></p>
+                </div>
+                <div class="timeline-body">
+                    <p></p>
+                    <p>该主机下所有账户：
+                        {% for item in host.hosttoremoteuser_set.all %}
+                            <mark>{{ item.remote_user.username }}</mark>
+                        {% endfor %}
+                    </p>
+                    <p>IDC机房： <mark>{{ host.idc.name }}</mark></p>
+                    <p>查看关于该主机的所有审计日志：
+                        <small><a class="cheek-log" href="{% url 'host_log' host.id %}">查看日志</a></small>
+                    </p>
+                </div>
+            </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}
+
+
+

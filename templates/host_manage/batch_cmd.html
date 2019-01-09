@@ -1,0 +1,437 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load monitor_tags %}
+
+{% block title %}
+    批量命令
+{% endblock %}
+
+{% block style %}
+    <style>
+        #wrap{margin-top: 30px;}
+
+        .operation span{cursor: pointer; margin-right: 10px; box-shadow: 2px 2px 6px rgba(0, 0, 0, .5); user-select: none;}
+        .operation span:active{box-shadow: none;}
+        .operation span i{font-size: 10px; line-height: 18px;}
+
+        .search{margin-top: 10px; border-bottom: 1px solid #f6f6f6;}
+        .search input.search-input{padding: 5px 10px; min-width: 50%; outline: none; border: none; font-size: 16px;
+            border-bottom: 2px solid transparent; transition: border-bottom .5s;}
+        .search input.search-input:focus{border-bottom: 2px solid rgba(169, 216, 110, 0.75);}
+        .search .search-icon{font-weight: bolder; font-size: 20px; line-height: 34px; cursor: pointer;}
+        .search .search-icon:hover{color: #000;}
+        .area{margin-top: 15px;}
+
+        .host-list li{padding: 5px;}
+
+        .clear-float::after{content: ''; display: block; clear: both;}
+        .controller-btn{margin-top: 20px;}
+        .controller-btn div.con{float: left; margin-right: 10px;}
+        .controller-btn div.con div{float: left;}
+        .controller-btn div.execute-cmd .right{width: 40px; height: 30px; line-height: 30px; text-align: center; color: #fff;}
+        .controller-btn .execute-cmd .execute{background-color: #9ac360;}
+        .controller-btn .execute-cmd .stop{background-color: #ee511f;}
+        .controller-btn div.execute-cmd button{padding: 5px 15px; height: 30px; line-height: 20px; border: none; color: #fff;}
+        .controller-btn div.execute-cmd button.execute-btn{background-color: #a8d363;}
+        .controller-btn div.execute-cmd button.stop-btn{background-color: #FF5722;}
+        .controller-btn div.execute-cmd button.execute-btn:hover{background-color: rgba(168, 211, 99, 0.85);}
+        .controller-btn div.execute-cmd button.stop-btn:hover{background-color: rgba(255, 87, 34, 0.84);}
+
+        .line{margin: 15px 0; height: 1px; width: 100%; background-color: #ececec;}
+
+        .layui-panel{padding-bottom: 20px;}
+
+        .table-title{float: left;}
+        .table-toggle{float: right; cursor: pointer;}
+        .table-toggle:hover{color: #FFB800;}
+        table tbody tr td a:hover{color: #01AAED;}
+
+        .information-area{margin-top: 15px;}
+        .item{padding: 5px; border-bottom: 1px dotted #dedede;}
+        .item .head i{font-size: 16px; vertical-align: bottom; cursor: pointer;}
+        .item .show{margin-top: 10px;}
+    </style>
+{% endblock %}
+
+{% block right_container %}
+    <blockquote class="layui-elem-quote" style="margin-top: 10px;"><h3>{% block nav %}批量命令{% endblock %}</h3></blockquote>
+    <div id="wrap">
+        <div class="col-lg-4 col-md-4 col-sm-4">
+            <div class="layui-card layui-panel">
+                <div class="layui-card-header">
+                    选择待操作的主机
+                    <span class="badge bg-info">已选： 0</span>
+                </div>
+                <div class="layui-card-body">
+                    <div class="operation">
+                    <span class="label label-default toggle-down">
+                        <i class="layui-icon layui-icon-down"></i>
+                        展开
+                    </span>
+                        <span class="label label-primary toggle-up">
+                        <i class="layui-icon layui-icon-up"></i>
+                        收缩
+                    </span>
+                        <span class="label label-success">
+                        <i class="layui-icon layui-icon-ok"></i>
+                        已选
+                    </span>
+                        <span class="label label-info">
+                        <i class="layui-icon layui-icon-circle"></i>
+                        未选
+                    </span>
+                        <span class="label label-warning">
+                        <i class="layui-icon layui-icon-radio"></i>
+                        全选
+                    </span>
+                        <span class="label label-danger">
+                        <i class="layui-icon layui-icon-release"></i>
+                        取消全选
+                    </span>
+                    </div>
+                    <div class="search">
+                        <input class="search-input" type="text" placeholder="搜索主机...">
+                        <i class="layui-icon layui-icon-search search-icon"></i>
+                    </div>
+                    <div class="area">
+                        <div class="layui-collapse layui-form">
+                            {% for host_group in host_groups %}
+                                <div class="layui-colla-item">
+                                    <h2 class="layui-colla-title">
+                                        {{ host_group.name }}
+                                        <span class="badge bg-success">主机数： {{ host_group.host_to_remote_users.count }}</span>
+                                    </h2>
+                                    <div class="layui-colla-content">
+                                        <ul class="host-list">
+                                            {% for host in host_group.host_to_remote_users.all %}
+                                                <li>
+                                                    <input type="checkbox"
+                                                           class="host-to-remote-user"
+                                                           value="{{ host.id }}"
+                                                           title="{{ host.host.name }}({{ host.host.ip_addr }})@{{ host.remote_user.username }}"
+                                                           lay-skin="primary">
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            <div class="layui-colla-item">
+                                <h2 class="layui-colla-title">
+                                    未分组主机
+                                    <span class="badge bg-success">主机数： {{ none_group.count }}</span>
+                                </h2>
+                                <div class="layui-colla-content">
+                                    <ul class="host-list">
+                                        {% for host in none_group %}
+                                            <li>
+                                                <input type="checkbox"
+                                                       class="host-to-remote-user"
+                                                       value="{{ host.id }}"
+                                                       title="{{ host.host.name }}({{ host.host.ip_addr }})@{{ host.remote_user.username }}"
+                                                       lay-skin="primary">
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8 col-md-8 col-sm-8">
+            <div class="layui-col-md12">
+                <div class="layui-card layui-panel">
+                    <div class="layui-card-header">{% block cmd_head %}批量命令执行{% endblock %}</div>
+                    <div class="layui-card-body">
+                        {% block cmd_option_area %}
+                            <div class="bat-cmd">
+                                <textarea placeholder="输入要执行的命令..." class="layui-textarea cmd" style="height: 70px;"></textarea>
+                            </div>
+                        {% endblock %}
+                        <div class="controller-btn clear-float">
+                            <div class="time-out con">
+                                <button class="layui-btn layui-btn-sm layui-btn-normal">
+                                    任务超时时间(30分钟)
+                                    <i class="layui-icon layui-icon-down"></i>
+                                </button>
+                            </div>
+                            <div class="execute-cmd con clear-float">
+                                <div class="right execute"><i class="layui-icon layui-icon-senior"></i></div>
+                                <button class="execute-btn layui-btn" data-method="notice">执行命令</button>
+                            </div>
+                            <div class="execute-cmd con clear-float">
+                                <div class="right stop"><i class="layui-icon layui-icon-pause"></i></div>
+                                <button class="stop-btn">停止</button>
+                            </div>
+                        </div>
+                        <div class="line"></div>
+                        <div class="information">
+                            <div class="top-span">
+                                <span class="badge bg-primary target-id">任务ID：N/A</span>
+                                <span class="badge bg-success target">总任务N/A</span>
+                                <span class="badge bg-info finished">已完成N/A</span>
+                                <span class="badge bg-warning defeat">失败N/A</span>
+                                <span class="badge bg-important rest">剩余N/A</span>
+                                <span class="badge information-span" style="cursor: pointer; user-select: none;">
+                                    <i class="fa fa-toggle-down"></i> 收缩/展开
+                                </span>
+                            </div>
+                        </div>
+                        <div class="information-area">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12" style="margin-top: 20px;">
+                <div class="layui-card layui-panel">
+                    <div class="layui-card-header clear-float">
+                        <div class="table-title">最近批量操作</div>
+                        <div class="table-toggle"><i class="layui-icon layui-icon-down"></i></div>
+                    </div>
+                    <div class="layui-card-body">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>任务ID</th>
+                                <th>任务类型</th>
+                                <th>任务内容</th>
+                                <th>主机个数</th>
+                                <th>成功</th>
+                                <th>失败</th>
+                                <th>未知</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for item in batch_command %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>
+                                        <a href="#">{{ item.id }}</a>
+                                    </td>
+                                    <td>{{ item.get_task_type_display }}</td>
+                                    <td>{{ item.content }}</td>
+                                    <td>{{ item.tasklogdetail_set.count }}</td>
+                                    {% count_host_num item as host_list %}
+                                    <td>{{ host_list.1 }}</td>
+                                    <td style="color: #f00;">{{ host_list.2 }}</td>
+                                    <td>{{ host_list.0 }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    {% block scopejs %}
+        <script>
+            /**
+             * cmd专属
+             */
+            (() => {
+                $(".host-manage").addClass("active");
+                $(".batch_cmd").addClass("active");
+            })();
+        </script>
+    {% endblock %}
+    <script>
+        $(".toggle-down").click(() => {
+            $(".area").css({"display": "block"});
+        });
+        $(".toggle-up").click(() => {
+            $(".area").css({"display": "none"});
+        });
+        $(".table-toggle").click(() => {
+            $(".table-toggle").parent().next().toggle();
+        });
+        $(".information-span").click(function() {
+            $(this).parent().parent().next().toggle();
+        });
+        function iToggle(self) {
+            $(self).parent().next().children().toggle();
+        }
+    </script>
+    <script>
+        layui.use('element', function(){
+            let element = layui.element;
+        });
+
+        layui.use('form', function(){
+            let form = layui.form;
+        });
+    </script>
+    <script>
+        // 具体的业务实现
+        function sendMsg(layero, layer, index) {
+            // 获取到选中的账户
+            let checkDoms = $(".host-to-remote-user:checked");
+            // 去重
+            let host_to_remote_user_ids = [];
+            $.each(checkDoms, function(index, item) {
+                if (host_to_remote_user_ids.indexOf($(item).val()) === -1) {
+                    host_to_remote_user_ids.push($(item).val());
+                }
+            });
+            // 获取要执行的命令
+            let command = $(".cmd").eq(0).val().trim();
+            if (!host_to_remote_user_ids.length || !command) {
+                $(layero).children('#LAY_layuipro').children().eq(0).children("b").css("color", "#f00");
+                $(layero).children('#LAY_layuipro').children().eq(0).children("b").html("主机或者批量命令不能为空！");
+                return;
+            }
+            // 获取cookie
+            let cookies = document.cookie;
+            let csrfArray = /csrftoken=[\w\d]+/.exec(cookies);
+            // 发送
+            $.ajax({
+                type: "post",
+                traditional: true,
+                headers: {'X-CSRFToken': csrfArray[0].split("=")[1]},
+                data: {"command": command, "batch-type": "cmd", "host-to-remote-user-ids": host_to_remote_user_ids},
+                dataType: 'JSON',
+                success(args) {
+                    // 将task_id存起来
+                    window.taskId = args[0]["id"];
+                    let statusChoices = args[args.length - 1];
+                    window.coloeSelector = ["info", "success", "danger", "warning"];
+                    args.pop();
+                    /**
+                     * 将任务栏的信息更新
+                     */
+                    {
+                        $(".target-id:eq(0)").html("任务ID：" + args[0]['id']);
+                        $(".target:eq(0)").html("总任务" + args.length);
+                        $(".finished:eq(0)").html("已完成0");
+                        $(".defeat:eq(0)").html("失败0");
+                        $(".rest:eq(0)").html("剩余" + args.length);
+                        window.finished = 0;
+                        window.rest = args.length;
+                        window.defeat = 0;
+                    }
+                    // 清除之前的内容
+                    $(".information-area:eq(0)").empty();
+                    $.each(args, function (index, item) {
+                        let infoStr = `
+                            <div class="item">
+                                <div class="head">
+                                    <i class="fa fa-plus-square-o" onclick="iToggle(this);"></i>
+                                    <span class="label label-primary">${item['tasklogdetail__host_to_remote_users__host__name']}(${item['tasklogdetail__host_to_remote_users__host__ip_addr']})</span>
+                                    <span class="label label-warning">User: ${item['tasklogdetail__host_to_remote_users__remote_user__username']}</span>
+                                    <span class="label label-info">System: ${item['tasklogdetail__host_to_remote_users__host__os_type']}</span>
+                                    <span class="label label-${coloeSelector[item['tasklogdetail__status']]}">Result: ${statusChoices[item['tasklogdetail__status']]}</span>
+                                </div>
+                                <div class="show">
+                                    <div class="alert alert-${coloeSelector[item['tasklogdetail__status']]}">
+                                        <b>${item['tasklogdetail__host_to_remote_users__host__name']}-${item['tasklogdetail__host_to_remote_users__host__os_type']}!</b>
+                                        <br>
+                                        <pre id="${item['tasklogdetail__host_to_remote_users__host__name']}_${item['tasklogdetail__host_to_remote_users__remote_user__username']}"
+                                             style="background: none; border: none;">
+                                            waiting for get data...<i class="layui-icon layui-icon-loading layui-icon layui-anim layui-anim-rotate layui-anim-loop"></i>
+                                        </pre>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        // 添加到information-area中
+                        $(".information-area:eq(0)").append(infoStr);
+                    });
+                    // 禁用执行命令的按钮
+                    let btn = $(".execute-btn:eq(0)");
+                    btn.attr("disabled", "disabled");
+                    btn.css({
+                        "cursor": "not-allowed",
+                    });
+                    // 启动websocket实时拿到更新的主机信息
+                    webSocket();
+                    layer.close(index);
+                },
+            });
+        }
+
+        layui.use('layer', function(){
+            let $ = layui.jquery, layer = layui.layer;
+            //触发事件
+            let active = {
+                notice: function(){
+                    layer.open({
+                        type: 1
+                        ,title: false
+                        ,closeBtn: 2
+                        ,area: '600px;'
+                        ,anim: 4
+                        ,resize: false
+                        ,id: 'LAY_layuipro' //设定一个id，防止重复弹出
+                        ,btn: ['确认', '取消']
+                        ,moveType: 1 //拖拽模式，0或者1
+                        ,content: `<div style="padding: 50px; line-height: 22px; background-color: #393D49;
+                                        color: #FFB800; font-weight: 300; text-align: center;">
+                                       <b>确定要批量执行该命令吗？</b>
+                                   </div>`
+                        ,yes: function(index, layero){
+                            // 确认后发送信息
+                            sendMsg(layero, layer, index);
+                        }
+                    });
+                },
+            };
+            $('.layui-btn').on('click', function(){
+                let othis = $(this), method = othis.data('method');
+                active[method] ? active[method].call(this, othis) : '';
+            });
+        });
+    </script>
+    <script>
+        /**
+         * 启动websocket
+         */
+        function webSocket() {
+            if (window.s) {
+                window.s.close()
+            }
+            let socket = new WebSocket("ws://" + window.location.host + "/monitor/host_detail_info/");
+            socket.onopen = function() {
+                // 将task_id发送过去
+                socket.send(window.taskId);
+            };
+            socket.onmessage = function(e) {
+                let data_arr = JSON.parse(e.data);
+                // 将任务栏的状态更新
+                window.rest--;
+                window.finished++;
+                $(".finished:eq(0)").html("已完成" + window.finished);
+                $(".rest:eq(0)").html("剩余" + window.rest);
+                if (data_arr[3] * 1 === 2 || data_arr[3] * 1 === 3) {
+                    window.defeat++;
+                    $(".defeat:eq(0)").html("失败" + window.defeat);
+                }
+                // 将消息推送显示
+                let dom = $(`#${data_arr[0]}_${data_arr[1]}`);
+                // 改变提示框样式
+                dom.parent().removeClass("alert-info").addClass("alert-" + window.coloeSelector[data_arr[3]]);
+                let domChildren = dom.parent().parent().prev().children();
+                $(domChildren[domChildren.length - 1]).removeClass("label-info").addClass("label-" + window.coloeSelector[data_arr[3]]);
+                let result = ["initialized", "success", "failed", "timeout"];
+                $(domChildren[domChildren.length - 1]).html("Result: " + result[data_arr[3]]);
+                // 将结果返回到显示区域
+                dom.html(data_arr[2]);
+            };
+            socket.onclose = function() {
+                // 关闭后将发送命令按钮恢复
+                let btn = $(".execute-btn:eq(0)");
+                btn.removeAttr("disabled");
+                btn.css({
+                    "cursor": "pointer",
+                });
+            };
+            window.s = socket;
+        }
+    </script>
+{% endblock %}
+

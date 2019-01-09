@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{# title #}
+{% block title %}
+    堡垒机主页
+{% endblock %}
+
+{% block style %}
+    <style>
+        .con{margin: 0 0 40px 35px; width: 22.5%; display: flex; background-color: #fff; float: left;}
+        .con .left-icon{flex: 80px 0 0;}
+        .con .icon{height: 80px; width: 80px; margin: 20px; line-height: 100px; text-align: center; border-radius: 50%;}
+        .con .icon i{color: #fff; font-size: 36px;}
+        .con .right-text{flex: 1;}
+        .con .right-text .num{height: 50%; font-weight: 700; font-size: 28px; color: #000; text-align: left; line-height: 60px;}
+        .con .right-text .text{height: 50%; font-weight: 700; font-size: 18px; text-align: left;}
+
+        .login-count{display: flex;}
+        .login-count .user-login-chars{flex: 1; padding: 0 20px;}
+        .login-count .user-login-table{flex: 500px 0 0; padding: 0 20px;}
+
+        .chars{display: flex;}
+        .chars .fans{flex: 1;}
+        .chars .histogram{flex: 1;}
+
+        .footer-table{background-color: #fff; margin: 20px 20px; padding: 20px 20px; border-radius: 8px;
+            border: 1px solid #dedede;}
+    </style>
+{% endblock %}
+
+{% block right_container %}
+    <blockquote class="layui-elem-quote" style="margin-top: 10px;"><h3>首页显示</h3></blockquote>
+    <div class="row mt">
+        <div class="con">
+            <div class="left-icon">
+                <div class="icon" style="background-color: #31b0d5;"><i class="fa fa-desktop"></i></div>
+            </div>
+            <div class="right-text">
+                <div class="num">4</div>
+                <div class="text">已管理的服务器</div>
+            </div>
+        </div>
+        <div class="con">
+            <div class="left-icon">
+                <div class="icon" style="background-color: #449d44;"><i class="fa fa-user"></i></div>
+            </div>
+            <div class="right-text">
+                <div class="num">4</div>
+                <div class="text">注册用户数</div>
+            </div>
+        </div>
+        <div class="con">
+            <div class="left-icon">
+                <div class="icon" style="background-color: #ec971f;"><i class="fa fa-bookmark"></i></div>
+            </div>
+            <div class="right-text">
+                <div class="num">4</div>
+                <div class="text">当前在线用户</div>
+            </div>
+        </div>
+        <div class="con">
+            <div class="left-icon">
+                <div class="icon" style="background-color: #c9302c;"><i class="fa fa-book"></i></div>
+            </div>
+            <div class="right-text">
+                <div class="num">4</div>
+                <div class="text">正在连接的主机数</div>
+            </div>
+        </div>
+    </div>
+    <div class="login-count">
+        <div class="user-login-chars">
+            <div class="panel panel-primary">
+                <div class="panel-heading"><h4>用户登录记录统计图</h4></div>
+                <div class="panel-body chars">
+                    <div class="fans">
+                        <div id="fans" style="min-width:400px; height:400px;"></div>
+                    </div>
+                    <div class="histogram">
+                        <div id="histogram" style="min-width:400px;height:400px"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="user-login-table">
+            <div class="panel panel-info">
+                <div class="panel-heading"><h4>上周活跃用户统计</h4></div>
+                <div class="panel-body">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th>用户</th>
+                            <th>登录次数</th>
+                            <th>操作命令数</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>Mark</td>
+                            <td>Otto</td>
+                            <td>@mdo</td>
+                        </tr>
+                        <tr>
+                            <td>Jacob</td>
+                            <td>Thornton</td>
+                            <td>@fat</td>
+                        </tr>
+                        <tr>
+                            <td>Simon</td>
+                            <td>Mosa</td>
+                            <td>@twitter</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer-table">
+        <h2>最新10条批量记录</h2>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>任务ID</th>
+                    <th>日期</th>
+                    <th>操作用户</th>
+                    <th>操作主机数</th>
+                    <th>操作类型</th>
+                    <th>操作内容</th>
+                    <th>成功数</th>
+                    <th>失败数</th>
+                    <th>未知数</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>2018 02 5</td>
+                    <td>Eric Jin</td>
+                    <td>10</td>
+                    <td>CMD</td>
+                    <td>df -h</td>
+                    <td>10</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>2018 02 5</td>
+                    <td>Eric Jin</td>
+                    <td>10</td>
+                    <td>CMD</td>
+                    <td>df -h</td>
+                    <td>10</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>2018 02 5</td>
+                    <td>Eric Jin</td>
+                    <td>10</td>
+                    <td>CMD</td>
+                    <td>df -h</td>
+                    <td>10</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>2018 02 5</td>
+                    <td>Eric Jin</td>
+                    <td>10</td>
+                    <td>CMD</td>
+                    <td>df -h</td>
+                    <td>10</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'plugins/highchars/highcharts.js' %}"></script>
+    <script>
+        (function() {
+            $(".dashboard").addClass("active");
+            // 初始化扇形图
+            fansInit();
+            // 初始化柱状图
+            histogramInit();
+            // 去掉charts的文字提示
+            $("text.highcharts-credits").remove();
+        })();
+
+        function fansInit() {
+            Highcharts.chart('fans', {
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false,
+                    type: 'pie'
+                },
+                title: {
+                    text: '上周活跃用户统计扇形图'
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                            style: {
+                                color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                            }
+                        }
+                    }
+                },
+                series: [{
+                    name: '登录占比',
+                    colorByPoint: true,
+                    data: [{
+                        name: 'Eric Jin',
+                        y: 60,
+                        sliced: true,
+                        selected: true
+                    }, {
+                        name: 'Dike',
+                        y: 10
+                    }, {
+                        name: 'Rice',
+                        y: 10
+                    }, {
+                        name: 'Mike',
+                        y: 10
+                    }]
+                }]
+            });
+        }
+
+        function histogramInit() {
+            Highcharts.chart('histogram',{
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: '上周每天的登录量'
+                },
+                xAxis: {
+                    categories: [
+                        '周日','周一','周二','周三','周四','周五','周六',
+                    ],
+                    crosshair: true
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: '登录总次数'
+                    }
+                },
+                tooltip: {
+                    // head + 每个 point + footer 拼接成完整的 table
+                    headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                    pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                        '<td style="padding:0"><b>{point.y:.1f} 次</b></td></tr>',
+                    footerFormat: '</table>',
+                    shared: true,
+                    useHTML: true
+                },
+                plotOptions: {
+                    column: {
+                        borderWidth: 0
+                    }
+                },
+                series: [{
+                    name: '次数',
+                    data: [49, 71, 106, 129, 144, 176, 135, ]
+                }, ]
+            });
+        }
+    </script>
+{% endblock %}
+
