@@ -3,9 +3,17 @@
 {% block style %}
     {{ block.super }}
     <style>
-        .info{padding-left: 0;}
-        .layui-input-inline{margin-top: 8px;}
-        .file-opt-area{margin-top: 10px;}
+        .info {
+            padding-left: 0;
+        }
+
+        .layui-input-inline {
+            margin-top: 8px;
+        }
+
+        .file-opt-area {
+            margin-top: 10px;
+        }
     </style>
 {% endblock %}
 
@@ -24,13 +32,13 @@
             <blockquote class="layui-elem-quote">选择文件类型</blockquote>
         </div>
         <div class="layui-input-inline">
-            <select name="transfer_type">
+            <select lay-filter="file_transfer" name="transfer_type">
                 <option value="file_upload">传送本地文件到远程</option>
                 <option value="file_download">从远程下载文件</option>
             </select>
         </div>
         <hr class="layui-bg-green">
-        <div class="file-opt-area">
+        <div class="file_upload-area">
             <div class="layui-upload-drag" id="file_upload">
                 <i class="layui-icon"></i>
                 <p>选择要传送的文件，点击上传，或将文件拖拽到此处</p>
@@ -39,7 +47,28 @@
                 <div class="layui-form-item">
                     <label class="layui-form-label">远程目录</label>
                     <div class="layui-input-inline" style="margin-top: 0; min-width: 300px;">
-                        <input name="username" placeholder="请输入要传送到远程主机的目录" autocomplete="off" class="layui-input" type="text">
+                        <input name="username" placeholder="请输入要传送到远程主机的目录路径" autocomplete="off" class="layui-input"
+                               type="text">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="file_download-area" style="display: none;">
+            <div class="layui-form layui-form-pane" style="margin-top: 10px;">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">远程目录</label>
+                    <div class="layui-input-inline" style="margin-top: 0; min-width: 300px;">
+                        <input name="username" placeholder="请输入要从远程下载的文件" autocomplete="off" class="layui-input"
+                               type="text">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form layui-form-pane" style="margin-top: 10px;">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">本地目录</label>
+                    <div class="layui-input-inline" style="margin-top: 0; min-width: 300px;">
+                        <input name="username" placeholder="请输入要保存在本地的目录路径" autocomplete="off" class="layui-input"
+                               type="text">
                     </div>
                 </div>
             </div>
@@ -65,19 +94,31 @@
     {{ block.super }}
     <!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
     <script>
-        layui.use('upload', function(){
+        layui.use('upload', function () {
             let upload = layui.upload;
             // 设定文件大小限制
             upload.render({
                 elem: '#file_upload'
-                ,url: '/upload/'
-                ,size: 1024 * 1024       // 限制文件大小，单位 KB, 允许1GB
-                ,auto: false            // 选择文件后不自动上传
-                ,bindAction: '#testListAction' // 指向一个按钮触发上传
-                ,exts: "*"
-                ,done: function(res){
+                , url: '/upload/'
+                , size: 1024 * 1024       // 限制文件大小，单位 KB, 允许1GB
+                , auto: false            // 选择文件后不自动上传
+                , bindAction: '#testListAction' // 指向一个按钮触发上传
+                , exts: "*"
+                , done: function (res) {
                     console.log(res)
                 }
+            });
+        });
+    </script>
+    <script>
+        layui.use('form', function () {
+            let form = this.form;
+            // 监听select框修改事件
+            let prevDom = $(".file_upload-area");
+            form.on('select(file_transfer)', (data) => {
+                // 隐藏上一个区域
+                prevDom.css("display", "none");
+                prevDom = $(`.${data.value}-area`).css("display", "block");
             });
         });
     </script>
