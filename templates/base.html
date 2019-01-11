@@ -257,6 +257,7 @@
 <script src="{% static 'js/jquery.dcjqaccordion.2.7.js' %}"></script>
 <script src="{% static 'js/jquery.scrollTo.min.js' %}"></script>
 <script src="{% static 'js/common-scripts.js' %}"></script>
+<script src="{% static 'js/cookies.js' %}"></script>
 <script>
     /**
      * 设置自动锁屏时间,20分钟
@@ -264,13 +265,10 @@
     const IntervalTime = 1000 * 60 * 20;   // 1000 * 60 * 20
     function goto() {
         // 退出登录状态
-        // 获取cookie
-        let cookies = document.cookie;
-        let csrfArray = /csrftoken=[\w\d]+/.exec(cookies);
         $.ajax({
             url: '{% url "lock_screem" %}',
             type: "post",
-            headers: {"X-CSRFToken": csrfArray[0].split("=")[1]},
+            headers: {"X-CSRFToken": csrfToken},
             success(args) {
                 // 将邮箱存到cookie中
                 // document.cookie = 'cookieName=cookieValue;path=/bbb;expires=Thu, 01-Jan-2020 00:00:01 GMT';
