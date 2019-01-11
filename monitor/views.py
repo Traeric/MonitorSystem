@@ -1,3 +1,4 @@
+import json
 import time
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -169,3 +170,30 @@ def host_detail_info(request):
             time.sleep(2)
         time.sleep(2)
         return
+
+
+class FileTransfer(LoginRequiredMixin, View):
+    """批量文件操作"""
+
+    def post(self, request):
+        file = request.FILES.get("file")
+        base_dir = conf.settings.BATCH_FILE_DIR
+        import os
+        ret_msg = {
+            "status_code": 200,
+            "info": "file upload success",
+        }
+        try:
+            import time
+            file_split = file.name.rsplit(".", 1)
+            file_path = os.path.join(base_dir, "upload", "%s|%s.%s" % (file_split[0], time.time(), file_split[1]))
+            with open(file_path, r'wb') as f:
+                for chunk in file.chunks():
+                    f.write(chunk)
+            ret_msg['file_path'] = file_path
+            return HttpResponse(json.dumps(ret_msg))
+        except Exception as e:
+            ret_msg['status_code'] = 500   # 写入失败
+            ret_msg['info'] = "file upload error, error msg is %s" % e
+            return HttpResponse(json.dumps(ret_msg))
+

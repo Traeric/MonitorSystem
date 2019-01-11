@@ -1,5 +1,7 @@
 {% extends 'host_manage/batch_cmd.html' %}
 
+{% block btn-type %}file_transfer{% endblock %}
+
 {% block style %}
     {{ block.super }}
     <style>
@@ -32,7 +34,7 @@
             <blockquote class="layui-elem-quote">选择文件类型</blockquote>
         </div>
         <div class="layui-input-inline">
-            <select lay-filter="file_transfer" name="transfer_type">
+            <select id="file_transfer_hook" lay-filter="file_transfer" name="transfer_type">
                 <option value="file_upload">传送本地文件到远程</option>
                 <option value="file_download">从远程下载文件</option>
             </select>
@@ -99,13 +101,17 @@
             // 设定文件大小限制
             upload.render({
                 elem: '#file_upload'
-                , url: '/upload/'
+                , url: "{% url 'file_transfer' %}"
                 , size: 1024 * 1024       // 限制文件大小，单位 KB, 允许1GB
-                , auto: false            // 选择文件后不自动上传
-                , bindAction: '#testListAction' // 指向一个按钮触发上传
-                , exts: "*"
-                , done: function (res) {
-                    console.log(res)
+                , headers: {"X-CSRFToken": csrfToken}
+                , accept: 'file'
+                , done: function (data) {
+                    if (parseInt(data['status_code']) === 500) {
+                        alert(data['info']);
+                    } else if (parseInt(data['status_code']) === 200) {
+                        // 此时，文件已经上传到了堡垒机，将文件在堡垒机中的地址存起来，方便后面传输
+                        window.localStorage.setItem("file_path", data['file_path']);
+                    }
                 }
             });
         });

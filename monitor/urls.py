@@ -26,4 +26,5 @@ urlpatterns = [
     url(r'^batch_file/$', views.BatchFile.as_view(), name='batch_file'),
     # websocket获取主机执行命令的信息
     url(r'^host_detail_info/$', views.host_detail_info),
+    url(r'^file_transfer/$', views.FileTransfer.as_view(), name="file_transfer"),
 ]

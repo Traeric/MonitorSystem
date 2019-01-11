@@ -132,3 +132,6 @@ LOGIN_URL = "/login"
 # 堡垒机ip跟端口
 CRAZYEYE_IP = "192.168.0.112"
 CRAZYEYE_PORT = "8001"
+
+# 文件批量操作目录
+BATCH_FILE_DIR = os.path.join(BASE_DIR, "statics", "file_save_dir")
