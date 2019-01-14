@@ -186,7 +186,7 @@ class FileTransfer(LoginRequiredMixin, View):
         try:
             import time
             file_split = file.name.rsplit(".", 1)
-            file_path = os.path.join(base_dir, "upload", "%s|%s.%s" % (file_split[0], time.time(), file_split[1]))
+            file_path = os.path.join(base_dir, "upload", "%s%s.%s" % (file_split[0], time.time(), file_split[1]))
             with open(file_path, r'wb') as f:
                 for chunk in file.chunks():
                     f.write(chunk)

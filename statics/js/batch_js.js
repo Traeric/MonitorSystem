@@ -2,20 +2,27 @@
 function sendMsg(layero, layer, index, batchType) {
     // 获取到选中的主机
     let checkDoms = $(".host-to-remote-user:checked");
-    // 去重
+    // 主机去重
     let host_to_remote_user_ids = [];
     $.each(checkDoms, function (index, item) {
         if (host_to_remote_user_ids.indexOf($(item).val()) === -1) {
             host_to_remote_user_ids.push($(item).val());
         }
     });
+    // 判断主机不能为空
+    if (!host_to_remote_user_ids.length) {
+        // 文字提示框的文字变成红色
+        $(layero).children('#LAY_layuipro').children().eq(0).children("b").css("color", "#f00");
+        $(layero).children('#LAY_layuipro').children().eq(0).children("b").html("必须选择主机！");
+        return;
+    }
+    // 要发送的数据
     let sendData = {"host-to-remote-user-ids": host_to_remote_user_ids};
     if (batchType === 'cmd') {              // 命令操作
         // 获取要执行的命令
         let command = $(".cmd").eq(0).val().trim();
-        if (!host_to_remote_user_ids.length || !command) {
-            $(layero).children('#LAY_layuipro').children().eq(0).children("b").css("color", "#f00");
-            $(layero).children('#LAY_layuipro').children().eq(0).children("b").html("主机或者批量命令不能为空！");
+        if (!command) {
+            $(layero).children('#LAY_layuipro').children().eq(0).children("b").html("批量命令不能为空！");
             return;
         }
         sendData['command'] = command;
@@ -25,26 +32,40 @@ function sendMsg(layero, layer, index, batchType) {
         // 获取文件传输类型
         let transfer_type = $("#file_transfer_hook option:selected").val().trim();
         if (transfer_type === "file_upload") {          // 远程上传
-            // 获取文件在堡垒机上的位置并删除
+            // 获取文件在堡垒机上的位置
             let file_path = window.localStorage.getItem("file_path");
-            window.localStorage.removeItem("file_path");
-            if (file_path) {
+            if (!file_path) {
                 // 没有选择上传的文件
-                $(layero).children('#LAY_layuipro').children().eq(0).children("b").css("color", "#f00");
-                $(layero).children('#LAY_layuipro').children().eq(0).children("b").html("请选择要传送的文件！");
+                $(layero).children('#LAY_layuipro').children().eq(0).children("b").html("请选择要发送到远程主机的文件！");
                 return
             }
-
-            
-            alert("file_upload");
+            // 获取要传送到远程的路径
+            let remote_path = $("#remote_path_hook").val().trim();
+            if (!remote_path) {
+                $(layero).children('#LAY_layuipro').children().eq(0).children("b").html("请选择要发送到远程主机的位置！");
+                return;
+            }
+            // 删除localStorage的上传文件的路径
+            window.localStorage.removeItem("file_path");
+            // 整理发送的数据
+            sendData['batch-type'] = transfer_type;   // 批量命令执行的类型
+            sendData['file_path'] = file_path;      // 上传文件在堡垒机的位置
+            sendData['remote_path'] = remote_path;   // 传送到远程主机的位置
+            // 恢复文件提示
+            let fileInfoDom = $("#file_info_hook");
+            fileInfoDom.html("选择要传送的文件，点击上传，或将文件拖拽到此处");
+            fileInfoDom.css({
+                color: "#999",
+                fontWeight: "normal",
+            });
         } else if (transfer_type === "file_download") {         // 远程下载
             alert("file_download");
         }
-        return
     }
 
     // 发送
     $.ajax({
+        url: "/monitor/batch_cmd/",
         type: "post",
         traditional: true,
         headers: {'X-CSRFToken': csrfToken},
@@ -102,6 +123,7 @@ function sendMsg(layero, layer, index, batchType) {
             btn.css({
                 "cursor": "not-allowed",
             });
+            // 关闭弹窗
             layer.close(index);
             // 启动websocket实时拿到更新的主机信息
             webSocket();
@@ -129,6 +151,7 @@ layui.use('layer', function () {
                                        <b>确定要批量执行该命令吗？</b>
                                    </div>`
                 , yes: function (index, layero) {
+                    // 获取文件发送的类型
                     let batchType = $('.execute-btn:eq(0)').data('batch').trim();
                     // 确认后发送信息
                     sendMsg(layero, layer, index, batchType);
