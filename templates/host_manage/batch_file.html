@@ -5,17 +5,11 @@
 {% block style %}
     {{ block.super }}
     <style>
-        .info {
-            padding-left: 0;
-        }
+        .info {padding-left: 0;}
 
-        .layui-input-inline {
-            margin-top: 8px;
-        }
+        .layui-input-inline {margin-top: 8px;}
 
-        .file-opt-area {
-            margin-top: 10px;
-        }
+        .file-opt-area {margin-top: 10px;}
     </style>
 {% endblock %}
 
@@ -43,13 +37,13 @@
         <div class="file_upload-area">
             <div class="layui-upload-drag" id="file_upload">
                 <i class="layui-icon"></i>
-                <p>选择要传送的文件，点击上传，或将文件拖拽到此处</p>
+                <p id="file_info_hook">选择要传送的文件，点击上传，或将文件拖拽到此处</p>
             </div>
             <div class="layui-form layui-form-pane" style="margin-top: 10px;">
                 <div class="layui-form-item">
                     <label class="layui-form-label">远程目录</label>
                     <div class="layui-input-inline" style="margin-top: 0; min-width: 300px;">
-                        <input name="username" placeholder="请输入要传送到远程主机的目录路径" autocomplete="off" class="layui-input"
+                        <input id="remote_path_hook" name="username" placeholder="请输入要传送到远程主机的目录路径" autocomplete="off" class="layui-input"
                                type="text">
                     </div>
                 </div>
@@ -111,6 +105,12 @@
                     } else if (parseInt(data['status_code']) === 200) {
                         // 此时，文件已经上传到了堡垒机，将文件在堡垒机中的地址存起来，方便后面传输
                         window.localStorage.setItem("file_path", data['file_path']);
+                        let fileInfoDom = $("#file_info_hook");
+                        fileInfoDom.html("文件选择成功！请输入要传送到远程主机路径...");
+                        fileInfoDom.css({
+                            color: "#f0ad4e",
+                            fontWeight: "700",
+                        });
                     }
                 }
             });
