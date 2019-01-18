@@ -22,6 +22,7 @@ function sendMsg(layero, layer, index, batchType) {
         // 获取要执行的命令
         let command = $(".cmd").eq(0).val().trim();
         if (!command) {
+            $(layero).children('#LAY_layuipro').children().eq(0).children("b").css("color", "#f00");
             $(layero).children('#LAY_layuipro').children().eq(0).children("b").html("批量命令不能为空！");
             return;
         }
@@ -36,12 +37,14 @@ function sendMsg(layero, layer, index, batchType) {
             let file_path = window.localStorage.getItem("file_path");
             if (!file_path) {
                 // 没有选择上传的文件
+                $(layero).children('#LAY_layuipro').children().eq(0).children("b").css("color", "#f00");
                 $(layero).children('#LAY_layuipro').children().eq(0).children("b").html("请选择要发送到远程主机的文件！");
                 return
             }
             // 获取要传送到远程的路径
             let remote_path = $("#remote_path_hook").val().trim();
             if (!remote_path) {
+                $(layero).children('#LAY_layuipro').children().eq(0).children("b").css("color", "#f00");
                 $(layero).children('#LAY_layuipro').children().eq(0).children("b").html("请选择要发送到远程主机的位置！");
                 return;
             }
@@ -59,10 +62,37 @@ function sendMsg(layero, layer, index, batchType) {
                 fontWeight: "normal",
             });
         } else if (transfer_type === "file_download") {         // 远程下载
-            alert("file_download");
+            // 拿到本地目录
+            let localPath = $("#localpath_hook").val().trim();
+            if (!localPath) {
+                $(layero).children('#LAY_layuipro').children().eq(0).children("b").css("color", "#f00");
+                $(layero).children('#LAY_layuipro').children().eq(0).children("b").html("本地路径不能为空！");
+                return;
+            }
+
+            // 获取远程路径
+            let remotePathObj = {};
+            $(".remote-host_id").each((index, item) => {
+                // 获取主机的id
+                let hostId = $(item).data("hostid");
+                // 获取远程路径
+                let remotePath = $(item).val().trim();
+                if (remotePath) {
+                    remotePathObj[hostId] = remotePath;
+                }
+            });
+            if ($.isEmptyObject(remotePathObj)) {
+                $(layero).children('#LAY_layuipro').children().eq(0).children("b").css("color", "#f00");
+                $(layero).children('#LAY_layuipro').children().eq(0).children("b").html("远程路径不能为空！");
+                return;
+            }
+
+            // 整理发送的数据
+            sendData['batch-type'] = transfer_type;   // 批量命令执行的类型
+            sendData['local_path'] = localPath;      // 本地文件路径
+            sendData['remote_path'] = JSON.stringify(remotePathObj);   // 从远程主机下载文件的路径
         }
     }
-
     // 发送
     $.ajax({
         url: "/monitor/batch_cmd/",

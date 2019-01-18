@@ -1,4 +1,5 @@
 {% extends 'host_manage/batch_cmd.html' %}
+{% load staticfiles %}
 
 {% block btn-type %}file_transfer{% endblock %}
 
@@ -52,18 +53,9 @@
         <div class="file_download-area" style="display: none;">
             <div class="layui-form layui-form-pane" style="margin-top: 10px;">
                 <div class="layui-form-item">
-                    <label class="layui-form-label">远程目录</label>
-                    <div class="layui-input-inline" style="margin-top: 0; min-width: 300px;">
-                        <input name="username" placeholder="请输入要从远程下载的文件" autocomplete="off" class="layui-input"
-                               type="text">
-                    </div>
-                </div>
-            </div>
-            <div class="layui-form layui-form-pane" style="margin-top: 10px;">
-                <div class="layui-form-item">
                     <label class="layui-form-label">本地目录</label>
                     <div class="layui-input-inline" style="margin-top: 0; min-width: 300px;">
-                        <input name="username" placeholder="请输入要保存在本地的目录路径" autocomplete="off" class="layui-input"
+                        <input id="localpath_hook" name="localpath" placeholder="请输入要保存到本地的路径" autocomplete="off" class="layui-input"
                                type="text">
                     </div>
                 </div>
@@ -116,6 +108,7 @@
             });
         });
     </script>
+    <script src="{% static 'js/file_style.js' %}"></script>
     <script>
         layui.use('form', function () {
             let form = this.form;
@@ -125,6 +118,31 @@
                 // 隐藏上一个区域
                 prevDom.css("display", "none");
                 prevDom = $(`.${data.value}-area`).css("display", "block");
+
+                let hostDom = $("#host_hook li div");
+                if (flag) {
+                    // 获取所有被选中的主机
+                    let checkDoms = $(".host-to-remote-user:checked");
+                    // 主机去重
+                    let host_to_remote_users = [];
+                    let host_to_remote_user_ids = [];
+                    $.each(checkDoms, function (index, item) {
+                        if (host_to_remote_user_ids.indexOf($(item).val()) === -1) {
+                            host_to_remote_users.push(item);
+                            host_to_remote_user_ids.push($(item).val());
+                        }
+                    });
+                    // 将所有的已选中的主机添加到右侧的面板
+                    initHostInput(host_to_remote_users);
+                    // 绑定点击事件
+                    hostDom.each(function () {
+                        this.isSelect = host_to_remote_users.indexOf($(this).prev().get(0)) === -1;
+                    });
+                    hostDom.bind("click", hostSelect);
+                } else {
+                    hostDom.unbind("click", hostSelect);
+                }
+                flag = !flag;
             });
         });
     </script>

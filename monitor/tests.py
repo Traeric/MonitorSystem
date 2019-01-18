@@ -18,7 +18,7 @@ import paramiko
 # ssh.close()
 
 
-import datetime
+# import datetime
 
 # date = datetime.datetime.strptime("2017-8-27", "%Y-%m-%d")
 # print(date)
@@ -28,15 +28,18 @@ import datetime
 #     print("============")
 
 
-status_choices = (
-    (0, "initialized"),
-    (1, "sucess"),
-    (2, "failed"),
-    (3, "timeout"),
-)
+# status_choices = (
+#     (0, "initialized"),
+#     (1, "sucess"),
+#     (2, "failed"),
+#     (3, "timeout"),
+# )
 # print(list(map(lambda x: x[1], status_choices)))
 
-a = [1, 2, 5]
-print()
+# a = [1, 2, 5]
+# print()
+
+import json
+print(json.loads('{"5":"fdsfds","6":"fdsfds","7":"fdsfdsf"}'))
 
 

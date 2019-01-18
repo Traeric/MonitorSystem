@@ -38,6 +38,14 @@ class MultiTask(object):
         self.public(content="传送本地文件到远程", host_ids=host_ids,
                     task_type="file_upload", params=[upload_path, remote_path])
 
+    def file_download(self, host_ids):
+        request = self.request
+        # 获取参数
+        local_path = request.POST.get("local_path", None)
+        remote_path = request.POST.get("remote_path", None)
+        self.public(content="从远程下载文件", host_ids=host_ids,
+                    task_type="file_download", params=[local_path, remote_path])
+
     def public(self, content, host_ids, task_type="cmd", params=None):
         """
         批量命令共同执行的方法
