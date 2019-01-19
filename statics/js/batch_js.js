@@ -62,14 +62,6 @@ function sendMsg(layero, layer, index, batchType) {
                 fontWeight: "normal",
             });
         } else if (transfer_type === "file_download") {         // 远程下载
-            // 拿到本地目录
-            let localPath = $("#localpath_hook").val().trim();
-            if (!localPath) {
-                $(layero).children('#LAY_layuipro').children().eq(0).children("b").css("color", "#f00");
-                $(layero).children('#LAY_layuipro').children().eq(0).children("b").html("本地路径不能为空！");
-                return;
-            }
-
             // 获取远程路径
             let remotePathObj = {};
             $(".remote-host_id").each((index, item) => {
@@ -89,7 +81,6 @@ function sendMsg(layero, layer, index, batchType) {
 
             // 整理发送的数据
             sendData['batch-type'] = transfer_type;   // 批量命令执行的类型
-            sendData['local_path'] = localPath;      // 本地文件路径
             sendData['remote_path'] = JSON.stringify(remotePathObj);   // 从远程主机下载文件的路径
         }
     }

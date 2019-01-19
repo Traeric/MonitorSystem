@@ -49,6 +49,11 @@ function distinct(addId, isSelect) {
  * let all checked host display on left panel as input style
  */
 function initHostInput(host_to_remote_users) {
+    if (host_to_remote_users.length > 0) {
+        // 清空右侧的面板
+        $("#remote_host_showing").empty();
+    }
+
     // 循环添加到右侧面板
     $.each(host_to_remote_users, (index, item) => {
         // 获取主机信息
@@ -66,7 +71,7 @@ function initHostInput(host_to_remote_users) {
                 </div>
             </div>
         `;
-        $(".file_download-area:eq(0)").append(str);
+        $("#remote_host_showing").append(str);
     });
 }
 

@@ -26,11 +26,21 @@ class MultiTask(object):
             func(host_to_remote_user_ids)
 
     def cmd(self, host_ids):
+        """
+        批量命令执行
+        :param host_ids:
+        :return:
+        """
         request = self.request
         command = request.POST.get('command', None)
         self.public(command, host_ids)
 
     def file_upload(self, host_ids):
+        """
+        本地文件上传
+        :param host_ids:
+        :return:
+        """
         request = self.request
         # 获取参数
         upload_path = request.POST.get("file_path", None)   # 堡垒机文件上传位置
@@ -39,12 +49,16 @@ class MultiTask(object):
                     task_type="file_upload", params=[upload_path, remote_path])
 
     def file_download(self, host_ids):
+        """
+        远程文件下载
+        :param host_ids:
+        :return:
+        """
         request = self.request
         # 获取参数
-        local_path = request.POST.get("local_path", None)
         remote_path = request.POST.get("remote_path", None)
         self.public(content="从远程下载文件", host_ids=host_ids,
-                    task_type="file_download", params=[local_path, remote_path])
+                    task_type="file_download", params=["zw", remote_path])
 
     def public(self, content, host_ids, task_type="cmd", params=None):
         """

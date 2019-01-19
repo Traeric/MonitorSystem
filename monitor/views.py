@@ -3,6 +3,7 @@ import time
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
+from django.http.response import FileResponse
 from django.shortcuts import render, HttpResponse
 from django import conf
 from django.contrib.auth import logout
@@ -175,7 +176,26 @@ def host_detail_info(request):
 class FileTransfer(LoginRequiredMixin, View):
     """批量文件操作"""
 
+    def get(self, request):
+        """
+        下载文件到本地
+        :param request:
+        :return:
+        """
+        # 获取文件路径
+        file_path = request.GET.get("file", None)
+        file = open(file_path, 'rb')
+        response = FileResponse(file)
+        response['Content-Type'] = 'application/octet-stream'
+        response['Content-Disposition'] = 'attachment;filename="%s"' % file_path.rsplit("/", maxsplit=1)[1]
+        return response
+
     def post(self, request):
+        """
+        上传文件
+        :param request:
+        :return:
+        """
         file = request.FILES.get("file")
         base_dir = conf.settings.BATCH_FILE_DIR
         import os

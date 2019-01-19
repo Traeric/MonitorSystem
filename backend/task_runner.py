@@ -79,9 +79,10 @@ class TaskRunner(object):
                 local_path = os.path.join(conf.settings.BATCH_FILE_DIR, "download",
                                           task_id_dir, remote_path.rsplit("/", maxsplit=1)[1])
                 sftp.get(remote_path, local_path)
-                task_detail_log.result = "从%s下载文件成功" % host_to_remote_user.host.name
                 # 保存文件路径
-                
+                task_detail_log.result = \
+                    ("""从%s下载文件成功，<a style='color: #f00;' href='/monitor/file_transfer?file=%s'>点击下载到本地</a>""" %
+                     (host_to_remote_user.host.name, local_path))
             task_detail_log.status = 1
             transport.close()
         except Exception as e:

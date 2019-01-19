@@ -6,11 +6,17 @@
 {% block style %}
     {{ block.super }}
     <style>
-        .info {padding-left: 0;}
+        .info {
+            padding-left: 0;
+        }
 
-        .layui-input-inline {margin-top: 8px;}
+        .layui-input-inline {
+            margin-top: 8px;
+        }
 
-        .file-opt-area {margin-top: 10px;}
+        .file-opt-area {
+            margin-top: 10px;
+        }
     </style>
 {% endblock %}
 
@@ -44,7 +50,8 @@
                 <div class="layui-form-item">
                     <label class="layui-form-label">远程目录</label>
                     <div class="layui-input-inline" style="margin-top: 0; min-width: 300px;">
-                        <input id="remote_path_hook" name="username" placeholder="请输入要传送到远程主机的目录路径" autocomplete="off" class="layui-input"
+                        <input id="remote_path_hook" name="username" placeholder="请输入要传送到远程主机的目录路径" autocomplete="off"
+                               class="layui-input"
                                type="text">
                     </div>
                 </div>
@@ -52,13 +59,11 @@
         </div>
         <div class="file_download-area" style="display: none;">
             <div class="layui-form layui-form-pane" style="margin-top: 10px;">
-                <div class="layui-form-item">
-                    <label class="layui-form-label">本地目录</label>
-                    <div class="layui-input-inline" style="margin-top: 0; min-width: 300px;">
-                        <input id="localpath_hook" name="localpath" placeholder="请输入要保存到本地的路径" autocomplete="off" class="layui-input"
-                               type="text">
-                    </div>
+                <div class="alert alert-info alert-dismissable">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                    <strong>提示!</strong> 请在右侧主机列表选择主机
                 </div>
+                <div id="remote_host_showing"></div>
             </div>
         </div>
     </div>
