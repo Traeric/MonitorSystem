@@ -64,11 +64,11 @@
                 </div>
                 <div class="layui-card-body">
                     <div class="operation">
-                    <span class="label label-default toggle-down">
+                    <span class="label label-default toggle-down" @click="toggleDown">
                         <i class="layui-icon layui-icon-down"></i>
                         展开
                     </span>
-                        <span class="label label-primary toggle-up">
+                        <span class="label label-primary toggle-up" @click="toggleUp">
                         <i class="layui-icon layui-icon-up"></i>
                         收缩
                     </span>
@@ -93,7 +93,7 @@
                         <input class="search-input" type="text" placeholder="搜索主机...">
                         <i class="layui-icon layui-icon-search search-icon"></i>
                     </div>
-                    <div id="host_hook" class="area">
+                    <div id="host_hook" class="area" ref="area">
                         <div class="layui-collapse layui-form">
                             {% for host_group in host_groups %}
                                 <div class="layui-colla-item">
@@ -175,12 +175,12 @@
                                 <span class="badge bg-info finished">已完成N/A</span>
                                 <span class="badge bg-warning defeat">失败N/A</span>
                                 <span class="badge bg-important rest">剩余N/A</span>
-                                <span class="badge information-span" style="cursor: pointer; user-select: none;">
+                                <span @click="toggle('info')" class="badge information-span" style="cursor: pointer; user-select: none;">
                                     <i class="fa fa-toggle-down"></i> 收缩/展开
                                 </span>
                             </div>
                         </div>
-                        <div class="information-area">
+                        <div id="info_hook" class="information-area">
                         </div>
                     </div>
                 </div>
@@ -189,9 +189,9 @@
                 <div class="layui-card layui-panel">
                     <div class="layui-card-header clear-float">
                         <div class="table-title">最近批量操作</div>
-                        <div class="table-toggle"><i class="layui-icon layui-icon-down"></i></div>
+                        <div class="table-toggle" @click="toggle('table')"><i class="layui-icon layui-icon-down"></i></div>
                     </div>
-                    <div class="layui-card-body">
+                    <div id="table_hook" class="layui-card-body">
                         <table class="table table-hover">
                             <thead>
                             <tr>
@@ -210,7 +210,7 @@
                                 <tr>
                                     <td>{{ forloop.counter }}</td>
                                     <td>
-                                        <a href="#">{{ item.id }}</a>
+                                        <a href="javascript:void(0);" @click="getCmdInfo({{ item.id }})">{{ item.id }}</a>
                                     </td>
                                     <td>{{ item.get_task_type_display }}</td>
                                     <td>{{ item.content }}</td>
@@ -243,18 +243,6 @@
         </script>
     {% endblock %}
     <script>
-        $(".toggle-down").click(() => {
-            $(".area").css({"display": "block"});
-        });
-        $(".toggle-up").click(() => {
-            $(".area").css({"display": "none"});
-        });
-        $(".table-toggle").click(() => {
-            $(".table-toggle").parent().next().toggle();
-        });
-        $(".information-span").click(function() {
-            $(this).parent().parent().next().toggle();
-        });
         function iToggle(self) {
             $(self).parent().next().children().toggle();
         }
@@ -269,5 +257,77 @@
         });
     </script>
     <script src="{% static 'js/batch_js.js' %}"></script>
+    <script src="{% static 'plugins/vue/vue2.5.22.js' %}"></script>
+    <script src="{% static 'plugins/vue/axios0.18.0.js' %}"></script>
+    <script>
+        new Vue({
+            el: "#wrap",
+            data: {
+            },
+            methods: {
+                getCmdInfo(id) {
+                    let index = layer.open({
+                        type: 2,
+                        content: `<div>
+                                    <i class="layui-icon layui-icon-loading layui-icon layui-anim layui-anim-rotate layui-anim-loop" style="font-size: 20px; color: #1E9FFF;"></i>
+                                 </div>`,
+                        title: "请求数据",
+                        skin: "layui-layer-molv",
+                        isOutAnim: false,
+                    });
+                    // 请求后端的数据
+                    axios.get(`/monitor/batch_cmd_display/${id}`).then(response => {
+                        let data = response.data;
+                        layer.close(index);
+                        // 填充字符串
+                        let colorSelector = ['#01AAED', '#5FB878', '#FF5722', '#FF5722'];
+                        let content = `<div class="item">
+                                       <h2 style="margin-bottom: 20px; color: #01AAED;" class="layui-timeline-title">
+                                           <span style="font-weight: 700; color: #393D49;">User:</span> ${data['user']}
+                                           <span style="font-weight: 700; color: #393D49;">Email:</span> ${data['email']}
+                                       </h2>
+                                       <ul class="layui-timeline">`;
+                        for (let item of data['cmd_list']) {
+                            content += `
+                                <li class="layui-timeline-item">
+                                    <i class="layui-icon layui-timeline-axis"></i>
+                                    <div class="layui-timeline-content layui-text" style="color: ${colorSelector[item.status]};">
+                                        <h3 style="color: ${colorSelector[item.status]};" class="layui-timeline-title">${item.host}(${item.ip_addr})</h3>
+                                        <p>
+                                            ${item.result}
+                                        </p>
+                                    </div>
+                                </li>
+                            `;
+                        }
+                        content += `</ul></div>`;
+                        let index1 = layer.open({
+                            type: 0,
+                            area: '50%',
+                            closeBtn: 2,
+                            shadeClose: true,
+                            btn: ["关闭"],
+                            title: `命令类型 - ${data['task_type']} - ${data['content']}`,
+                            content: content,
+                            skin: "layui-layer-molv",
+                        });
+                    });
+                },
+                toggleDown() {
+                    this.$refs.area.style.display = 'block';
+                },
+                toggleUp() {
+                    this.$refs.area.style.display = 'none';
+                },
+                toggle(type) {
+                    if (type === "table") {
+                        $("#table_hook").toggle();
+                    } else if (type === 'info') {
+                        $("#info_hook").toggle();
+                    }
+                },
+            },
+        });
+    </script>
 {% endblock %}
 

@@ -1,6 +1,7 @@
 import json
 import time
 
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.http.response import FileResponse
@@ -216,4 +217,37 @@ class FileTransfer(LoginRequiredMixin, View):
             ret_msg['status_code'] = 500   # 写入失败
             ret_msg['info'] = "file upload error, error msg is %s" % e
             return HttpResponse(json.dumps(ret_msg))
+
+
+@login_required
+def cmd_display(request, cmd_id):
+    """
+    查询批量命令的详细结果
+    :param request:
+    :param cmd_id:
+    :return:
+    """
+    # 查询数主Task
+    task_obj = models.Task.objects.filter(id=cmd_id)
+    # 查询出主Task下的task detail
+    task_detals = task_obj[0].tasklogdetail_set.select_related()
+    cmd_list = []       # 传到前端的记录
+    for task_detal in task_detals:
+        # 获取单条记录的信息
+        detail_obj = {
+            'result': task_detal.result,
+            'status': task_detal.status,
+            'date': str(task_detal.date),
+            'host': task_detal.host_to_remote_users.host.name,
+            'ip_addr': task_detal.host_to_remote_users.host.ip_addr,
+        }
+        cmd_list.append(detail_obj)
+    return HttpResponse(json.dumps({
+        "cmd_list": cmd_list,
+        "task_type": task_obj[0].task_type,
+        'content': task_obj[0].content,
+        'user': task_obj[0].user.name,
+        'email': task_obj[0].user.email,
+    }))
+
 
