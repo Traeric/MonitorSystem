@@ -1,31 +1,92 @@
 {% extends "base.html" %}
 {% load staticfiles %}
+{% load monitor_tags %}
 
-{# title #}
 {% block title %}
     堡垒机主页
 {% endblock %}
 
 {% block style %}
     <style>
-        .con{margin: 0 0 40px 35px; width: 22.5%; display: flex; background-color: #fff; float: left;}
-        .con .left-icon{flex: 80px 0 0;}
-        .con .icon{height: 80px; width: 80px; margin: 20px; line-height: 100px; text-align: center; border-radius: 50%;}
-        .con .icon i{color: #fff; font-size: 36px;}
-        .con .right-text{flex: 1;}
-        .con .right-text .num{height: 50%; font-weight: 700; font-size: 28px; color: #000; text-align: left; line-height: 60px;}
-        .con .right-text .text{height: 50%; font-weight: 700; font-size: 18px; text-align: left;}
+        .con {
+            margin: 0 0 40px 35px;
+            width: 22.5%;
+            display: flex;
+            background-color: #fff;
+            float: left;
+        }
 
-        .login-count{display: flex;}
-        .login-count .user-login-chars{flex: 1; padding: 0 20px;}
-        .login-count .user-login-table{flex: 500px 0 0; padding: 0 20px;}
+        .con .left-icon {
+            flex: 80px 0 0;
+        }
 
-        .chars{display: flex;}
-        .chars .fans{flex: 1;}
-        .chars .histogram{flex: 1;}
+        .con .icon {
+            height: 80px;
+            width: 80px;
+            margin: 20px;
+            line-height: 100px;
+            text-align: center;
+            border-radius: 50%;
+        }
 
-        .footer-table{background-color: #fff; margin: 20px 20px; padding: 20px 20px; border-radius: 8px;
-            border: 1px solid #dedede;}
+        .con .icon i {
+            color: #fff;
+            font-size: 36px;
+        }
+
+        .con .right-text {
+            flex: 1;
+        }
+
+        .con .right-text .num {
+            height: 50%;
+            font-weight: 700;
+            font-size: 28px;
+            color: #000;
+            text-align: left;
+            line-height: 60px;
+        }
+
+        .con .right-text .text {
+            height: 50%;
+            font-weight: 700;
+            font-size: 18px;
+            text-align: left;
+        }
+
+        .login-count {
+            display: flex;
+        }
+
+        .login-count .user-login-chars {
+            flex: 1;
+            padding: 0 20px;
+        }
+
+        .login-count .user-login-table {
+            flex: 500px 0 0;
+            padding: 0 20px;
+        }
+
+        .chars {
+            display: flex;
+        }
+
+        .chars .fans {
+            flex: 1;
+        }
+
+        .chars .histogram {
+            flex: 1;
+        }
+
+        .footer-table {
+            background-color: #fff;
+            margin: 20px 20px;
+            padding: 20px 20px;
+            border-radius: 8px;
+            border: 1px solid #dedede;
+        }
     </style>
 {% endblock %}
 
@@ -37,7 +98,7 @@
                 <div class="icon" style="background-color: #31b0d5;"><i class="fa fa-desktop"></i></div>
             </div>
             <div class="right-text">
-                <div class="num">4</div>
+                <div class="num">{{ host_count }}</div>
                 <div class="text">已管理的服务器</div>
             </div>
         </div>
@@ -46,7 +107,7 @@
                 <div class="icon" style="background-color: #449d44;"><i class="fa fa-user"></i></div>
             </div>
             <div class="right-text">
-                <div class="num">4</div>
+                <div class="num">{{ user_number }}</div>
                 <div class="text">注册用户数</div>
             </div>
         </div>
@@ -121,63 +182,33 @@
         <h2>最新10条批量记录</h2>
         <table class="table table-hover">
             <thead>
-                <tr>
-                    <th>任务ID</th>
-                    <th>日期</th>
-                    <th>操作用户</th>
-                    <th>操作主机数</th>
-                    <th>操作类型</th>
-                    <th>操作内容</th>
-                    <th>成功数</th>
-                    <th>失败数</th>
-                    <th>未知数</th>
-                </tr>
+            <tr>
+                <th>任务ID</th>
+                <th>日期</th>
+                <th>操作用户</th>
+                <th>操作主机数</th>
+                <th>操作类型</th>
+                <th>操作内容</th>
+                <th>成功数</th>
+                <th>失败数</th>
+                <th>未知数</th>
+            </tr>
             </thead>
             <tbody>
+            {% for task in task_obj %}
                 <tr>
-                    <td>1</td>
-                    <td>2018 02 5</td>
-                    <td>Eric Jin</td>
-                    <td>10</td>
-                    <td>CMD</td>
-                    <td>df -h</td>
-                    <td>10</td>
-                    <td>0</td>
-                    <td>0</td>
+                    <td style="font-weight: 700; color: #01AAED;">{{ task.id }}</td>
+                    <td>{{ task.date|date:"Y年m月d日" }} {{ task.date|time:"G点i分s秒" }}</td>
+                    <td>{{ task.user.name|capfirst }}</td>
+                    <td>{{ task.tasklogdetail_set.count }}</td>
+                    <td>{{ task.task_type }}</td>
+                    <td style="font-weight: 700; color: #FF5722;">{{ task.content }}</td>
+                    {% count_host_num task as count %}
+                    <td>{{ count.1 }}</td>
+                    <td>{{ count.2 }}</td>
+                    <td>{{ count.0 }}</td>
                 </tr>
-                <tr>
-                    <td>1</td>
-                    <td>2018 02 5</td>
-                    <td>Eric Jin</td>
-                    <td>10</td>
-                    <td>CMD</td>
-                    <td>df -h</td>
-                    <td>10</td>
-                    <td>0</td>
-                    <td>0</td>
-                </tr>
-                <tr>
-                    <td>1</td>
-                    <td>2018 02 5</td>
-                    <td>Eric Jin</td>
-                    <td>10</td>
-                    <td>CMD</td>
-                    <td>df -h</td>
-                    <td>10</td>
-                    <td>0</td>
-                    <td>0</td>
-                </tr>
-                <tr>
-                    <td>1</td>
-                    <td>2018 02 5</td>
-                    <td>Eric Jin</td>
-                    <td>10</td>
-                    <td>CMD</td>
-                    <td>df -h</td>
-                    <td>10</td>
-                    <td>0</td>
-                    <td>0</td>
-                </tr>
+            {% endfor %}
             </tbody>
         </table>
     </div>
@@ -186,7 +217,7 @@
 {% block js %}
     <script src="{% static 'plugins/highchars/highcharts.js' %}"></script>
     <script>
-        (function() {
+        (function () {
             $(".dashboard").addClass("active");
             // 初始化扇形图
             fansInit();
@@ -246,7 +277,7 @@
         }
 
         function histogramInit() {
-            Highcharts.chart('histogram',{
+            Highcharts.chart('histogram', {
                 chart: {
                     type: 'column'
                 },
@@ -255,7 +286,7 @@
                 },
                 xAxis: {
                     categories: [
-                        '周日','周一','周二','周三','周四','周五','周六',
+                        '周日', '周一', '周二', '周三', '周四', '周五', '周六',
                     ],
                     crosshair: true
                 },
@@ -281,8 +312,8 @@
                 },
                 series: [{
                     name: '次数',
-                    data: [49, 71, 106, 129, 144, 176, 135, ]
-                }, ]
+                    data: [49, 71, 106, 129, 144, 176, 135,]
+                },]
             });
         }
     </script>

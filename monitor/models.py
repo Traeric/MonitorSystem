@@ -48,6 +48,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=64, verbose_name="用户名", unique=True)
     host_to_remote_users = models.ManyToManyField(to="HostToRemoteUser", verbose_name="关联主机账户")
     host_group = models.ManyToManyField(to="HostGroup", verbose_name="主机组")
+    last_login = models.DateTimeField(verbose_name="最近登录时间", null=True, blank=True)
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=True)
