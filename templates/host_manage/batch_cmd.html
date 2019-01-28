@@ -60,34 +60,34 @@
             <div class="layui-card layui-panel">
                 <div class="layui-card-header">
                     选择待操作的主机
-                    <span class="badge bg-info">已选： 0</span>
+                    <span class="badge bg-info" v-text="'已选： ' + selectedHost"></span>
                 </div>
                 <div class="layui-card-body">
                     <div class="operation">
-                    <span class="label label-default toggle-down" @click="toggleDown">
-                        <i class="layui-icon layui-icon-down"></i>
-                        展开
-                    </span>
+                        <span class="label label-default toggle-down" @click="toggleDown">
+                            <i class="layui-icon layui-icon-down"></i>
+                            展开
+                        </span>
                         <span class="label label-primary toggle-up" @click="toggleUp">
-                        <i class="layui-icon layui-icon-up"></i>
-                        收缩
-                    </span>
-                        <span class="label label-success">
-                        <i class="layui-icon layui-icon-ok"></i>
-                        已选
-                    </span>
+                            <i class="layui-icon layui-icon-up"></i>
+                            收缩
+                        </span>
+                        <span class="label label-success" @click="selected">
+                            <i class="layui-icon layui-icon-ok"></i>
+                            已选
+                        </span>
                         <span class="label label-info">
-                        <i class="layui-icon layui-icon-circle"></i>
-                        未选
-                    </span>
-                        <span class="label label-warning">
-                        <i class="layui-icon layui-icon-radio"></i>
-                        全选
-                    </span>
-                        <span class="label label-danger">
-                        <i class="layui-icon layui-icon-release"></i>
-                        取消全选
-                    </span>
+                            <i class="layui-icon layui-icon-circle"></i>
+                            未选
+                        </span>
+                        <span class="label label-warning" @click="selectAll">
+                            <i class="layui-icon layui-icon-radio"></i>
+                            全选
+                        </span>
+                        <span class="label label-danger" @click="cancleAll">
+                            <i class="layui-icon layui-icon-release"></i>
+                            取消全选
+                        </span>
                     </div>
                     <div class="search">
                         <input class="search-input" type="text" placeholder="搜索主机...">
@@ -101,10 +101,10 @@
                                         {{ host_group.name }}
                                         <span class="badge bg-success">主机数： {{ host_group.host_to_remote_users.count }}</span>
                                     </h2>
-                                    <div class="layui-colla-content">
+                                    <div :class="'layui-colla-content' + (showAll ? ' layui-show' : '')">
                                         <ul class="host-list">
                                             {% for host in host_group.host_to_remote_users.all %}
-                                                <li>
+                                                <li @click="addHost">
                                                     <input type="checkbox"
                                                            class="host-to-remote-user"
                                                            value="{{ host.id }}"
@@ -121,10 +121,10 @@
                                     未分组主机
                                     <span class="badge bg-success">主机数： {{ none_group.count }}</span>
                                 </h2>
-                                <div class="layui-colla-content">
+                                <div :class="'layui-colla-content' + (showAll ? ' layui-show' : '')">
                                     <ul class="host-list">
                                         {% for host in none_group %}
-                                            <li>
+                                            <li @click="addHost">
                                                 <input type="checkbox"
                                                        class="host-to-remote-user"
                                                        value="{{ host.id }}"
@@ -263,6 +263,8 @@
         new Vue({
             el: "#wrap",
             data: {
+                showAll: false,
+                selectedHost: 0,
             },
             methods: {
                 getCmdInfo(id) {
@@ -301,7 +303,7 @@
                             `;
                         }
                         content += `</ul></div>`;
-                        let index1 = layer.open({
+                        layer.open({
                             type: 0,
                             area: '50%',
                             closeBtn: 2,
@@ -324,6 +326,37 @@
                         $("#table_hook").toggle();
                     } else if (type === 'info') {
                         $("#info_hook").toggle();
+                    }
+                },
+                selectAll() {
+                    // 全选
+                    // 首先打开所有的折叠页
+                    this.showAll = true;
+                    // 选中所有的
+                    $(".layui-form-checkbox").addClass("layui-form-checked");
+                    let checkboxDom = $("input[type=checkbox]");
+                    checkboxDom.attr("checked", "checked");
+                    this.selectedHost = checkboxDom.length;
+                },
+                cancleAll() {
+                    this.showAll = false;
+                    $(".layui-form-checkbox").removeClass("layui-form-checked");
+                    $("input[type=checkbox]").attr("checked", false);
+                    this.selectedHost = 0;
+                },
+                selected() {
+                    // 获取所有已经选中的主机
+                },
+                addHost(e) {
+                    let eleDom = e.target || e.srcElement;
+                    let eleName = eleDom.localName;
+                    if (eleName === "div" || eleName === "i" || eleName === "span") {
+                        if ($(e.currentTarget).children("input").prop("checked")) {
+                            // 没有选中
+                            this.selectedHost++;
+                        } else {
+                            this.selectedHost--;
+                        }
                     }
                 },
             },

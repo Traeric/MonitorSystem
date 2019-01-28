@@ -65,6 +65,50 @@ class HostLog(LoginRequiredMixin, View):
                 logs.append(log)
         return render(request, "log/host_log.html", locals())
 
+    def post(self, request, host_id):
+        """
+        日志记录查询，按堡垒机用户，远程主机用户以及筛选日志类型
+        :param request:
+        :param host_id:
+        :return:
+        """
+        # 获取主机信息
+        host = models.Host.objects.get(id=host_id)
+        host_to_remote_users = None
+        # 获取搜索的type
+        search_type = request.POST.get("type", None)
+        if search_type == "search":
+            # input搜索
+            # 获取搜索的内容
+            value = request.POST.get("value", None)
+            content = request.POST.get("search_field", None)
+            if value == "user":
+                # 搜索相应的堡垒机用户
+                # 查询出与该主机相关的所有账户
+                host_to_remote_users = host.hosttoremoteuser_set.filter(userprofile__name=content)
+            elif value == "remote":
+                # 根据远程主机的用户名搜索日志
+                # 查询符合条件的远程用户
+                host_to_remote_users = host.hosttoremoteuser_set.filter(remote_user__username=content)
+        # 获取要查询的日志
+        logs = []
+        if search_type == "type":
+            host_to_remote_users = host.hosttoremoteuser_set.select_related()
+        for items in host_to_remote_users:
+            if search_type == "type":
+                value = request.POST.get("value", None)
+                log_type = {
+                    "login": 0,
+                    "cmd": 1,
+                    "logout": 2,
+                }
+                for log in items.auditlog_set.filter(log_type=log_type[value]):
+                    logs.append(log)
+            else:
+                for log in items.auditlog_set.all():
+                    logs.append(log)
+        return render(request, "log/host_log.html", locals())
+
 
 class LogFilter(LoginRequiredMixin, View):
     """日志筛选"""
@@ -148,7 +192,7 @@ def host_detail_info(request):
         # 获取任务id
         task_id = int(message)
         # 定时获取主机信息
-        send_id = []    # 已经推送的主机id
+        send_id = []  # 已经推送的主机id
         while True:
             task_obj = models.Task.objects.filter(id=task_id)
             task_detail_objs = task_obj[0].tasklogdetail_set.select_related()
@@ -214,7 +258,7 @@ class FileTransfer(LoginRequiredMixin, View):
             ret_msg['file_path'] = file_path
             return HttpResponse(json.dumps(ret_msg))
         except Exception as e:
-            ret_msg['status_code'] = 500   # 写入失败
+            ret_msg['status_code'] = 500  # 写入失败
             ret_msg['info'] = "file upload error, error msg is %s" % e
             return HttpResponse(json.dumps(ret_msg))
 
@@ -231,7 +275,7 @@ def cmd_display(request, cmd_id):
     task_obj = models.Task.objects.filter(id=cmd_id)
     # 查询出主Task下的task detail
     task_detals = task_obj[0].tasklogdetail_set.select_related()
-    cmd_list = []       # 传到前端的记录
+    cmd_list = []  # 传到前端的记录
     for task_detal in task_detals:
         # 获取单条记录的信息
         detail_obj = {
@@ -249,5 +293,3 @@ def cmd_display(request, cmd_id):
         'user': task_obj[0].user.name,
         'email': task_obj[0].user.email,
     }))
-
-

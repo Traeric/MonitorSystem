@@ -7,10 +7,18 @@
 
 {% block style %}
     <style>
-        .breadcrumb-wrap .breadcrumb{background-color: #fff;}
+        .breadcrumb-wrap .breadcrumb {
+            background-color: #fff;
+        }
 
-        .footer-area{padding-left: 10px; background-color: #e6e6e6; margin-top: -10px; height: 45px; line-height: 45px;
-            border-radius: 0 4px;}
+        .footer-area {
+            padding-left: 10px;
+            background-color: #e6e6e6;
+            margin-top: -10px;
+            height: 45px;
+            line-height: 45px;
+            border-radius: 0 4px;
+        }
     </style>
 {% endblock %}
 
@@ -81,34 +89,42 @@
 
 {% block js %}
     <script>
-        (function() {
+        (function () {
             $(".log-page").addClass('active');
         })();
     </script>
 
     <script type="text/html" id="toolbarDemo">
         <div class="layui-btn-container form-inline">
-            <div class="search-area">
-                <input type="text" class="form-control" id="inputSuccess" placeholder="按堡垒机用户搜索">
-                <button type="submit" class="btn btn-theme" style="margin-left: 20px;">搜索</button>
-                <span style="margin: 2px 20px; display: inline-block; width: 1px; height: 30px; background-color: #bdbdbd;">h</span>
-                <input type="text" class="form-control" id="inputSuccess" placeholder="按远程主机用户搜索">
-                <button type="submit" class="btn btn-theme03" style="margin-left: 20px;">搜索</button>
-            </div>
-            <div class="log-type" style="margin-top: 20px;">
-                <div class="layui-btn-group">
-                    <button class="layui-btn layui-btn-normal">查看login类型的日志</button>
-                    <button class="layui-btn layui-btn-warm">查看cmd类型的日志</button>
-                    <button class="layui-btn layui-btn-danger">查看logout类型的日志</button>
+            <form id="logForm" action="{% url 'host_log' host_id %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="type">
+                <input type="hidden" name="value">
+                <input type="hidden" name="search_field">
+            </form>
+                <div class="search-area">
+                    <input type="text" name="user" class="form-control" id="inputSuccess" placeholder="按堡垒机用户搜索">
+                    <input type="button" value="搜索" onclick="submit('search-user')" class="btn btn-theme"
+                           style="margin-left: 20px;">
+                    <span style="margin: 2px 20px; display: inline-block; width: 1px; height: 30px; background-color: #bdbdbd;">h</span>
+                    <input type="text" name="remote" class="form-control" id="inputSuccess" placeholder="按远程主机用户搜索">
+                    <input type="button" value="搜索" onclick="submit('search-remote')" class="btn btn-theme03"
+                           style="margin-left: 20px;">
                 </div>
-            </div>
+                <div class="log-type" style="margin-top: 20px;">
+                    <div class="layui-btn-group">
+                        <button onclick="submit('type-login')" class="layui-btn layui-btn-normal">查看login类型的日志</button>
+                        <button onclick="submit('type-cmd')" class="layui-btn layui-btn-warm">查看cmd类型的日志</button>
+                        <button onclick="submit('type-logout')" class="layui-btn layui-btn-danger">查看logout类型的日志</button>
+                    </div>
+                </div>
         </div>
     </script>
 
     <!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
 
     <script>
-        layui.use('table', function(){
+        layui.use('table', function () {
             let table = layui.table;
 
             //转换静态表格
@@ -118,35 +134,38 @@
                 page: {                 // 开启分页
                     theme: '#000',
                     count: 15,          // 总数
-                    limits: [5, 10, 15, 20, 30, 100],
+                    limits: [5, 10, 15, 20],
                     limit: 5,       // 注意：请务必确保 limit 参数（默认：10）是与你服务端限定的数据条数一致
                 },
                 {#even: true,    // 隔行背景#}
             });
-            //工具栏事件
-            table.on('toolbar(test)', function(obj){
-                let checkStatus = table.checkStatus(obj.config.id);
-                switch(obj.event){
-                    case 'getCheckData':
-                        let data1 = checkStatus.data;
-                        layer.alert(JSON.stringify(data1));
-                        break;
-                    case 'getCheckLength':
-                        let data = checkStatus.data;
-                        layer.msg('选中了：'+ data.length + ' 个');
-                        break;
-                    case 'isAll':
-                        layer.msg(checkStatus.isAll ? '全选': '未全选');
-                        break;
-                }
-            });
         });
     </script>
+    <script>
+        // 搜索日志
+        function submit(type) {
+            // 检查输入框不能为空
+            let [prefix, suffix] = type.split("-");
+            let typeInput = $("#logForm input[name=type]");
+            let valueInput = $("#logForm input[name=value]");
+            let formDom = $('#logForm');
+            if (prefix === "search") {
+                let val = $(`input[name=${suffix}]:eq(0)`).val().trim();
+                if (!val) {
+                    layer.msg('请填写要搜索的内容', {icon: 5});
+                    return false;
+                } else {
+                    // 添加字段
+                    typeInput.val(prefix);
+                    valueInput.val(suffix);
+                    $("#logForm input[name=search_field]").val(val);
+                    formDom.submit();     // 提交表单
+                }
+            }
+            // 不是search
+            typeInput.val(prefix);
+            valueInput.val(suffix);
+            formDom.submit();     // 提交表单
+        }
+    </script>
 {% endblock %}
-
-
-
-
-
-
-
