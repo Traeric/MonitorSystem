@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    配置
+{% endblock %}
+{% block style %}
+    <style>
+        #wrap {margin-top: 20px;}
+        #wrap table tbody tr th, td {text-align: center;}
+        #wrap table thead tr th {text-align: center;}
+        .clear-float::after {content: ""; display: block; clear: both;}
+    </style>
+{% endblock %}
+
+
+{% block right_container %}
+    <blockquote class="layui-elem-quote" style="margin-top: 10px;"><h3>设置页面</h3></blockquote>
+    <div id="wrap">
+        <!-- 账户设置 -->
+        <div class="account-setting clear-float">
+            <div class="col-lg-6 col-md-6 col-sm-6">
+                <div class="panel panel-success">
+                    <div class="panel-heading">Authentication</div>
+                    <table class="table">  <!-- table-bordered -->
+                        <thead>
+                        <tr>
+                            <th>说明</th>
+                            <th>内容</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <th scope="row" style="line-height: 98px;">修改登录邮箱</th>
+                            <td>
+                                <form class="form-horizontal">
+                                    <div class="form-group">
+                                        <label for="inputEmail1" class="col-sm-2 control-label">原邮箱:</label>
+                                        <div class="col-sm-10">
+                                            <input readonly type="email" class="form-control" id="inputEmail1"
+                                                   placeholder="Email"
+                                                   value="{{ user.email }}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputEmail2" class="col-sm-2 control-label">新邮箱:</label>
+                                        <div class="col-sm-10">
+                                            <input type="email" class="form-control" id="inputEmail2" placeholder="Email">
+                                        </div>
+                                    </div>
+                                </form>
+                            </td>
+                            <td style="line-height: 98px;">
+                                <button class="btn btn-success btn-xs"><i class=" fa fa-pencil"></i> Modify</button>
+                                <button class="btn btn-danger btn-xs"><i class="fa fa-trash-o "></i> Cancle</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row" style="line-height: 147px;">修改登录密码</th>
+                            <td>
+                                <form class="form-horizontal">
+                                    <div class="form-group">
+                                        <label for="inputPassword1" class="col-sm-3 control-label">原密码:</label>
+                                        <div class="col-sm-9">
+                                            <input type="password" class="form-control" id="inputPassword1" placeholder="Old Password">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputPassword2" class="col-sm-3 control-label">新密码:</label>
+                                        <div class="col-sm-9">
+                                            <input type="password" class="form-control" id="inputPassword2" placeholder="New Password">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputPassword3" class="col-sm-3 control-label">再次输入:</label>
+                                        <div class="col-sm-9">
+                                            <input type="password" class="form-control" id="inputPassword3" placeholder="New Password">
+                                        </div>
+                                    </div>
+                                </form>
+                            </td>
+                            <td style="line-height: 147px;">
+                                <button class="btn btn-info btn-xs"><i class=" fa fa-pencil"></i> Modify</button>
+                                <button class="btn btn-danger btn-xs"><i class="fa fa-trash-o "></i> Cancle</button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-6 col-sm-6">
+                <div class="panel panel-info">
+                    <div class="panel-heading">Entertainment</div>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>说明</th>
+                            <th>内容</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <th scope="row" style="line-height: 98px;">修改用户名</th>
+                            <td>
+                                <form class="form-horizontal">
+                                    <div class="form-group">
+                                        <label for="inputUser1" class="col-sm-3 control-label">原用户名:</label>
+                                        <div class="col-sm-9">
+                                            <input readonly type="text" class="form-control" id="inputUser1"
+                                                   placeholder="Old Username"
+                                                   value="{{ user.name }}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputUser2" class="col-sm-3 control-label">新用户名:</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="inputUser2" placeholder="New Username">
+                                        </div>
+                                    </div>
+                                </form>
+                            </td>
+                            <td style="line-height: 98px;">
+                                <button class="btn btn-warning btn-xs"><i class=" fa fa-pencil"></i> Modify</button>
+                                <button class="btn btn-danger btn-xs"><i class="fa fa-trash-o "></i> Cancle</button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- 主机管理 -->
+        <div class="host-manager clear-float">
+            <div class="col-lg-4 col-md-4 col-sm-4">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">已管理主机</div>
+                    <div class="panel-body">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>主机名</th>
+                                <th>IP</th>
+                                <th>Port</th>
+                                <th>IDC</th>
+                                <th>主机注册时间</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for host in hosts %}
+                                <tr>
+                                    <th scope="row">{{ forloop.counter }}</th>
+                                    <td>{{ host.name }}</td>
+                                    <td>{{ host.ip_addr }}</td>
+                                    <td>{{ host.port }}</td>
+                                    <td>{{ host.idc }}</td>
+                                    <td>{{ host.date|date:'Y年m月d日' }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-4">
+                <div class="panel panel-warning">
+                    <div class="panel-heading">已管理的远程账户</div>
+                    <div class="panel-body">
+                        <table class="table table-hover remote-table">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>主机名</th>
+                                <th>IP</th>
+                                <th>远程用户名</th>
+                                <th>认证类型</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for remote_user in remote_users %}
+                                <tr>
+                                    <th scope="row">{{ forloop.counter }}</th>
+                                    <td>{{ remote_user.host.name }}</td>
+                                    <td>{{ remote_user.host.ip_addr }}</td>
+                                    <td>{{ remote_user.remote_user.username }}</td>
+                                    <td>{{ remote_user.remote_user.get_auth_type_display }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-4">
+                <div class="panel panel-danger">
+                    <div class="panel-heading">删除管理的远程账户</div>
+                    <div class="panel-body">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>主机名</th>
+                                <th>IP</th>
+                                <th>远程用户名</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody onclick="deleteRemoteUser();">
+                            {% for remote_user in remote_users %}
+                                <tr>
+                                    <th scope="row">{{forloop.counter }}</th>
+                                    <td>{{ remote_user.host.name }}</td>
+                                    <td>{{ remote_user.host.ip_addr }}</td>
+                                    <td>{{ remote_user.remote_user.username }}</td>
+                                    <td>
+                                        <button data-remote-id="{{ remote_user.id }}"
+                                                data-remote-name="{{ remote_user.remote_user.username }}"
+                                                data-host="{{ remote_user.host.name }}"
+                                                class="btn btn-danger btn-xs">
+                                            <i class="fa fa-trash-o"></i> Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/cookies.js' %}"></script>
+    <script>
+        (function () {
+            $(".setting-page").addClass('active');
+            layui.use('form', function(){
+                let form = layui.form;
+            });
+        })();
+
+        /**
+         * 删除远程用户
+         * @param event
+         */
+        function deleteRemoteUser(event) {
+            let e = event || window.event;
+            let currentDom = e.target || e.srcElement;
+            // 获取要删除的账户id跟账户名
+            let remoteId = $(currentDom).data("remote-id");
+            let remoteName = $(currentDom).data("remote-name");
+            let host = $(currentDom).data("host");
+            let rowId = $(currentDom).parent().parent().children()[0].innerHTML;       // 获取当前行的id
+            layer.confirm(`确定要删除${remoteName}(主机： ${host})远程账号吗？`, {
+                btn: ['取消', '删除'], //可以无限个按钮
+                anim: 1,
+                skin: 'layui-layer-lan',
+                closeBtn: 2,
+                title: "是否要删除远程账号",
+                btn2() {
+                    // 删除
+                    $.ajax({
+                        type: "delete",
+                        data: {"remote_id": remoteId},
+                        headers: {"X-CSRFToken": csrfToken},
+                        dataType: "json",
+                        success(args) {
+                            layer.msg(args.message, {icon: args.flag ? 1 : 5});
+                            // 删除本条记录
+                            if (args.flag) {
+                                // 删除当前的tr
+                                $(currentDom).parent().parent().remove();
+                                $(`.remote-table tbody tr:eq(${parseInt(rowId) - 1})`).remove();
+                            }
+                        },
+                    });
+                }
+            });
+        }
+    </script>
+{% endblock %}
+

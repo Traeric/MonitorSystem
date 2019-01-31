@@ -293,3 +293,30 @@ def cmd_display(request, cmd_id):
         'user': task_obj[0].user.name,
         'email': task_obj[0].user.email,
     }))
+
+
+class SettingHome(LoginRequiredMixin, View):
+    """设置页面"""
+
+    def get(self, request):
+        user = request.user
+        # 查询与该用户相关的所有的主机以及远程账户
+        remote_users = list(user.host_to_remote_users.all())
+        hosts = set(map(lambda x: x.host, remote_users))
+        return render(request, "settings/set_home.html", locals())
+
+    def delete(self, request):
+        host_to_remote_user_id = int(request.body.decode().split("=")[1])
+        # 移除指定的远程用户关系
+        try:
+            request.user.host_to_remote_users.remove(host_to_remote_user_id)
+            return HttpResponse(json.dumps({
+                "flag": True,
+                "message": "移除成功"
+            }))
+        except Exception:
+            return HttpResponse(json.dumps({
+                "flag": False,
+                "message": "移除失败"
+            }))
+
