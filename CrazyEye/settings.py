@@ -135,3 +135,12 @@ CRAZYEYE_PORT = "8001"
 
 # 文件批量操作目录
 BATCH_FILE_DIR = os.path.join(BASE_DIR, "statics", "file_save_dir")
+
+# 配置发送邮件相关信息
+EMAIL_USE_SSL = True
+EMAIL_HOST = 'smtp.qq.com'  # 如果是 163 改成 smtp.163.com
+EMAIL_PORT = 465
+EMAIL_HOST_USER = '2789519045@qq.com'  # 帐号
+EMAIL_HOST_PASSWORD = 'dfsmismiilkydghh'  # 授权码，QQ邮箱需要授权码作为第三方客户端的登录密码
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+

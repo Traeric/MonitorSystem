@@ -1,16 +1,21 @@
+import hashlib
 import json
+import os
 import time
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from django.http.response import FileResponse
 from django.shortcuts import render, HttpResponse
 from django import conf
 from django.contrib.auth import logout
+
 from . import models
 from backend.multitask import MultiTask
 from dwebsocket.decorators import accept_websocket
+from django.conf import settings
 
 # Create your views here.
 from django.views import View
@@ -318,5 +323,84 @@ class SettingHome(LoginRequiredMixin, View):
             return HttpResponse(json.dumps({
                 "flag": False,
                 "message": "移除失败"
+            }))
+
+
+class Authentication(LoginRequiredMixin, View):
+    """修改邮箱跟密码"""
+
+    def get(self, request):
+        """
+        处理邮箱认证链接
+        :param request:
+        :return:
+        """
+        # 获取参数
+        email = request.GET.get("email", None)
+        token = request.GET.get("token", None)
+        # 获取key跟时间
+        auth_key, ctime = token.split("|")
+        auth_time = float(ctime)
+        # 进行md5加密
+        auth_str = "%s|%f" % (settings.SECRET_KEY, auth_time)
+        md5 = hashlib.md5()
+        md5.update(bytes(auth_str, encoding="utf-8"))
+        md5_key = md5.hexdigest()
+        # 进行是否超时验证
+        if (time.time() - (15 * 60)) > auth_time:
+            return HttpResponse("验证超时")
+        # 验证秘钥是否正确
+        if not md5_key == auth_key:
+            return HttpResponse("秘钥错误")
+        # 验证通过，修改邮箱
+        user = request.user
+        user.email = email
+        user.save()
+        return HttpResponse("修改成功")
+
+    def post(self, request):
+        """
+        获取要修改的邮箱并发送信息给用户
+        :param request:
+        :return:
+        """
+        # 获取新的邮箱
+        new_email = request.POST.get("new_email", None)
+        # 给新邮箱发送验证消息
+        subject = "堡垒机修改邮箱"
+        email_from = settings.DEFAULT_FROM_EMAIL
+        # 生成链接
+        name = request.user.name
+        current_time = time.time()  # 获取当前时间
+        token_with_time = "%s|%f" % (settings.SECRET_KEY, current_time)  # 拼接字符串
+        # md5加密
+        md5 = hashlib.md5()
+        md5.update(bytes(token_with_time, encoding="utf-8"))
+        auth_key = md5.hexdigest()  # 获取加密后的值
+        # 将加密后的字符串与当前时间一起发过去
+        token = "%s|%f" % (auth_key, current_time)
+        # 生成链接
+        path = "http://127.0.0.1:8000/monitor/email_modify"
+        link = "{0}?email={1}&token={2}".format(path, new_email, token)
+        try:
+            filepath = os.path.join(settings.BASE_DIR, 'templates', 'settings', 'send_email.html')
+            with open(filepath, "r", encoding="utf8") as f:
+                html_content = f.read()
+            # 替换内容
+            html_content = html_content.replace("{zw name zw}", name).replace("{zw link zw}", link)
+            # 生成msg
+            msg = EmailMultiAlternatives(subject, html_content, email_from, [new_email])
+            msg.attach_alternative(html_content, "text/html")
+            # 发送邮件
+            msg.send()
+            return HttpResponse(json.dumps({
+                "status": True,
+                "message": "发送成功，请尽快登录邮箱进行验证，有效时间为15分钟。",
+            }))
+        except Exception:
+            # 发送出错
+            return HttpResponse(json.dumps({
+                "status": False,
+                "message": "发送失败，请重试。",
             }))
 

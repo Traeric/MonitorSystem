@@ -6,10 +6,23 @@
 {% endblock %}
 {% block style %}
     <style>
-        #wrap {margin-top: 20px;}
-        #wrap table tbody tr th, td {text-align: center;}
-        #wrap table thead tr th {text-align: center;}
-        .clear-float::after {content: ""; display: block; clear: both;}
+        #wrap {
+            margin-top: 20px;
+        }
+
+        #wrap table tbody tr th, td {
+            text-align: center;
+        }
+
+        #wrap table thead tr th {
+            text-align: center;
+        }
+
+        .clear-float::after {
+            content: "";
+            display: block;
+            clear: both;
+        }
     </style>
 {% endblock %}
 
@@ -46,14 +59,19 @@
                                     <div class="form-group">
                                         <label for="inputEmail2" class="col-sm-2 control-label">新邮箱:</label>
                                         <div class="col-sm-10">
-                                            <input type="email" class="form-control" id="inputEmail2" placeholder="Email">
+                                            <input name="new_email" type="email" class="form-control" id="inputEmail2"
+                                                   placeholder="Email">
                                         </div>
                                     </div>
                                 </form>
                             </td>
                             <td style="line-height: 98px;">
-                                <button class="btn btn-success btn-xs"><i class=" fa fa-pencil"></i> Modify</button>
-                                <button class="btn btn-danger btn-xs"><i class="fa fa-trash-o "></i> Cancle</button>
+                                <button class="btn btn-success btn-xs" onclick="modifyEmail();"><i
+                                        class=" fa fa-pencil"></i> Modify
+                                </button>
+                                <button class="btn btn-danger btn-xs" onclick="cancleEmail();"><i
+                                        class="fa fa-trash-o "></i> Cancle
+                                </button>
                             </td>
                         </tr>
                         <tr>
@@ -63,19 +81,22 @@
                                     <div class="form-group">
                                         <label for="inputPassword1" class="col-sm-3 control-label">原密码:</label>
                                         <div class="col-sm-9">
-                                            <input type="password" class="form-control" id="inputPassword1" placeholder="Old Password">
+                                            <input type="password" class="form-control" id="inputPassword1"
+                                                   placeholder="Old Password">
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label for="inputPassword2" class="col-sm-3 control-label">新密码:</label>
                                         <div class="col-sm-9">
-                                            <input type="password" class="form-control" id="inputPassword2" placeholder="New Password">
+                                            <input type="password" class="form-control" id="inputPassword2"
+                                                   placeholder="New Password">
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label for="inputPassword3" class="col-sm-3 control-label">再次输入:</label>
                                         <div class="col-sm-9">
-                                            <input type="password" class="form-control" id="inputPassword3" placeholder="New Password">
+                                            <input type="password" class="form-control" id="inputPassword3"
+                                                   placeholder="New Password">
                                         </div>
                                     </div>
                                 </form>
@@ -116,7 +137,8 @@
                                     <div class="form-group">
                                         <label for="inputUser2" class="col-sm-3 control-label">新用户名:</label>
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" id="inputUser2" placeholder="New Username">
+                                            <input type="text" class="form-control" id="inputUser2"
+                                                   placeholder="New Username">
                                         </div>
                                     </div>
                                 </form>
@@ -210,7 +232,7 @@
                             <tbody onclick="deleteRemoteUser();">
                             {% for remote_user in remote_users %}
                                 <tr>
-                                    <th scope="row">{{forloop.counter }}</th>
+                                    <th scope="row">{{ forloop.counter }}</th>
                                     <td>{{ remote_user.host.name }}</td>
                                     <td>{{ remote_user.host.ip_addr }}</td>
                                     <td>{{ remote_user.remote_user.username }}</td>
@@ -238,7 +260,7 @@
     <script>
         (function () {
             $(".setting-page").addClass('active');
-            layui.use('form', function(){
+            layui.use('form', function () {
                 let form = layui.form;
             });
         })();
@@ -278,6 +300,46 @@
                             }
                         },
                     });
+                }
+            });
+        }
+
+        /**
+         * 修改邮箱
+         */
+        function cancleEmail() {
+            // 清空邮箱
+            $("input[name='new_email']").val("");
+        }
+
+        function modifyEmail() {
+            layer.confirm(`确定要修改邮箱吗？`, {
+                btn: ['取消', '确认'], //可以无限个按钮
+                anim: 1,
+                skin: 'layui-layer-lan',
+                closeBtn: 2,
+                title: "是否要修改邮箱",
+                btn2() {
+                    // 修改
+                    // 获取邮箱内容
+                    let new_email = $("input[name='new_email']").val();
+                    // 邮箱正则表达式
+                    let re = /^[A-Za-z\d]+([-_.][A-Za-z\d]+)*@([A-Za-z\d]+[-.])+[A-Za-z\d]{2,4}$/;
+                    if (re.test(new_email)) {
+                        // 邮箱格式验证正确
+                        $.ajax({
+                            url: "{% url 'email_modify' %}",
+                            type: "post",
+                            headers: {"X-CSRFToken": csrfToken},
+                            dataType: "json",
+                            data: {new_email},
+                            success(args) {
+                                layer.msg(args.message, {icon: (args.status ? 1 : 5)});
+                            },
+                        });
+                    } else {
+                        layer.msg("邮箱格式错误", {icon: 5});
+                    }
                 }
             });
         }
