@@ -8,9 +8,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from django.http.response import FileResponse
-from django.shortcuts import render, HttpResponse
+from django.shortcuts import render, HttpResponse, redirect
 from django import conf
 from django.contrib.auth import logout
+from django.urls import reverse
 
 from . import models
 from backend.multitask import MultiTask
@@ -347,16 +348,20 @@ class Authentication(LoginRequiredMixin, View):
         md5.update(bytes(auth_str, encoding="utf-8"))
         md5_key = md5.hexdigest()
         # 进行是否超时验证
-        if (time.time() - (15 * 60)) > auth_time:
-            return HttpResponse("验证超时")
+        if (time.time() - (100 * 60)) > auth_time:
+            msg = "Sorry!!  Verify timeout..."
+            return render(request, "error_page/error.html", locals())
         # 验证秘钥是否正确
         if not md5_key == auth_key:
-            return HttpResponse("秘钥错误")
+            msg = "Authenticate key is error..."
+            return render(request, "error_page/error.html", locals())
         # 验证通过，修改邮箱
         user = request.user
         user.email = email
         user.save()
-        return HttpResponse("修改成功")
+        # 修改成功
+        path = reverse("setting_home")
+        return redirect(to=path)
 
     def post(self, request):
         """
@@ -403,4 +408,30 @@ class Authentication(LoginRequiredMixin, View):
                 "status": False,
                 "message": "发送失败，请重试。",
             }))
+
+
+@login_required
+def username_modify(request):
+    """
+    用户名修改
+    :param request:
+    :return:
+    """
+    # 获取用户名
+    if request.method == "POST":
+        username = request.POST.get("username", None)
+        if username != "":
+            # 修改用户名
+            request.user.name = username
+            try:
+                request.user.save()
+                return HttpResponse(json.dumps({
+                    "status": True,
+                    "message": "用户名修改成功",
+                }))
+            except Exception:
+                return HttpResponse(json.dumps({
+                    "status": False,
+                    "message": "用户名修改失败",
+                }))
 

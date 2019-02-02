@@ -137,15 +137,19 @@
                                     <div class="form-group">
                                         <label for="inputUser2" class="col-sm-3 control-label">新用户名:</label>
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" id="inputUser2"
+                                            <input name="username" type="text" class="form-control" id="inputUser2"
                                                    placeholder="New Username">
                                         </div>
                                     </div>
                                 </form>
                             </td>
                             <td style="line-height: 98px;">
-                                <button class="btn btn-warning btn-xs"><i class=" fa fa-pencil"></i> Modify</button>
-                                <button class="btn btn-danger btn-xs"><i class="fa fa-trash-o "></i> Cancle</button>
+                                <button onclick="modifyUsername();" class="btn btn-warning btn-xs"><i
+                                        class=" fa fa-pencil"></i> Modify
+                                </button>
+                                <button onclick="cancleUsername();" class="btn btn-danger btn-xs"><i
+                                        class="fa fa-trash-o "></i> Cancle
+                                </button>
                             </td>
                         </tr>
                         </tbody>
@@ -339,6 +343,45 @@
                         });
                     } else {
                         layer.msg("邮箱格式错误", {icon: 5});
+                    }
+                }
+            });
+        }
+
+        /**
+         * 修改用户名
+         */
+        function cancleUsername() {
+            // 清空用户名
+            $("input[name='username']").val("");
+        }
+
+        function modifyUsername() {
+            layer.confirm(`确定要修改用户名吗？`, {
+                btn: ['取消', '确认'], //可以无限个按钮
+                anim: 1,
+                skin: 'layui-layer-lan',
+                closeBtn: 2,
+                title: "是否要修改用户名",
+                btn2() {
+                    // 修改
+                    // 获取邮箱内容
+                    let username = $("input[name='username']").val();
+                    // 邮箱正则表达式
+                    if (username.trim() !== "") {
+                        // 邮箱格式验证正确
+                        $.ajax({
+                            url: "{% url 'username_modify' %}",
+                            type: "post",
+                            headers: {"X-CSRFToken": csrfToken},
+                            dataType: "json",
+                            data: {username},
+                            success(args) {
+                                layer.msg(args.message, {icon: (args.status ? 1 : 5)});
+                            },
+                        });
+                    } else {
+                        layer.msg("用户名不能为空", {icon: 5});
                     }
                 }
             });
