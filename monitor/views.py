@@ -12,6 +12,7 @@ from django.shortcuts import render, HttpResponse, redirect
 from django import conf
 from django.contrib.auth import logout
 from django.urls import reverse
+from django.contrib.auth import authenticate
 
 from . import models
 from backend.multitask import MultiTask
@@ -348,7 +349,7 @@ class Authentication(LoginRequiredMixin, View):
         md5.update(bytes(auth_str, encoding="utf-8"))
         md5_key = md5.hexdigest()
         # 进行是否超时验证
-        if (time.time() - (100 * 60)) > auth_time:
+        if (time.time() - (15 * 60)) > auth_time:
             msg = "Sorry!!  Verify timeout..."
             return render(request, "error_page/error.html", locals())
         # 验证秘钥是否正确
@@ -435,3 +436,30 @@ def username_modify(request):
                     "message": "用户名修改失败",
                 }))
 
+
+@login_required
+def password_modify(request):
+    """
+    修改密码
+    :param request:
+    :return:
+    """
+    # 获取新旧密码
+    if request.method == "POST":
+        new_password = request.POST.get("new_password", None)
+        old_password = request.POST.get("old_password", None)
+        # 验证旧密码是否正确
+        user = request.user
+        if not authenticate(username=user.email, password=old_password):
+            return HttpResponse(json.dumps({
+                "status": False,
+                "message": "原密码错误，请重新输入",
+            }))
+        else:
+            # 修改密码
+            user.set_password(new_password)
+            user.save()
+            return HttpResponse(json.dumps({
+                "status": True,
+                "message": "密码修改成功",
+            }))

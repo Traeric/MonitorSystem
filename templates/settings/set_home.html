@@ -81,29 +81,36 @@
                                     <div class="form-group">
                                         <label for="inputPassword1" class="col-sm-3 control-label">原密码:</label>
                                         <div class="col-sm-9">
-                                            <input type="password" class="form-control" id="inputPassword1"
+                                            <input name="old_password" type="password" class="form-control"
+                                                   id="inputPassword1"
                                                    placeholder="Old Password">
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label for="inputPassword2" class="col-sm-3 control-label">新密码:</label>
                                         <div class="col-sm-9">
-                                            <input type="password" class="form-control" id="inputPassword2"
+                                            <input name="new_password" type="password" class="form-control"
+                                                   id="inputPassword2"
                                                    placeholder="New Password">
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <label for="inputPassword3" class="col-sm-3 control-label">再次输入:</label>
                                         <div class="col-sm-9">
-                                            <input type="password" class="form-control" id="inputPassword3"
-                                                   placeholder="New Password">
+                                            <input name="confirm_password" type="password" class="form-control"
+                                                   id="inputPassword3"
+                                                   placeholder="Confirm Password">
                                         </div>
                                     </div>
                                 </form>
                             </td>
                             <td style="line-height: 147px;">
-                                <button class="btn btn-info btn-xs"><i class=" fa fa-pencil"></i> Modify</button>
-                                <button class="btn btn-danger btn-xs"><i class="fa fa-trash-o "></i> Cancle</button>
+                                <button onclick="modifyPassword();" class="btn btn-info btn-xs"><i
+                                        class=" fa fa-pencil"></i> Modify
+                                </button>
+                                <button onclick="canclePassword();" class="btn btn-danger btn-xs"><i
+                                        class="fa fa-trash-o "></i> Cancle
+                                </button>
                             </td>
                         </tr>
                         </tbody>
@@ -385,6 +392,58 @@
                     }
                 }
             });
+        }
+
+        /**
+         * 修改密码
+         */
+        function canclePassword() {
+            // 清除密码
+            $("input[name='old_password']").val('');
+            $("input[name='new_password']").val('');
+            $("input[name='confirm_password']").val('');
+        }
+
+        function modifyPassword() {
+            let old_password = $("input[name='old_password']").val().trim();
+            let new_password = $("input[name='new_password']").val().trim();
+            let confirm_password = $("input[name='confirm_password']").val().trim();
+            if (new_password === confirm_password) {
+                if ((old_password !== "") || (new_password !== "")) {
+                    // 密码不为空
+                    layer.confirm(`确定要修改密码吗？`, {
+                        btn: ['取消', '确认'], //可以无限个按钮
+                        anim: 1,
+                        skin: 'layui-layer-lan',
+                        closeBtn: 2,
+                        title: "是否要修改密码",
+                        btn2() {
+                            // 修改
+                            // 邮箱格式验证正确
+                            $.ajax({
+                                url: "{% url 'password_modify' %}",
+                                type: "post",
+                                headers: {"X-CSRFToken": csrfToken},
+                                dataType: "json",
+                                data: {
+                                    old_password,
+                                    new_password,
+                                },
+                                success(args) {
+                                    layer.msg(args.message, {icon: (args.status ? 1 : 5)});
+                                    setTimeout(function () {
+                                        window.location.reload();
+                                    }, 2000);
+                                },
+                            });
+                        }
+                    });
+                } else {
+                    layer.msg("原密码不能为空", {icon: 5});
+                }
+            } else {
+                layer.msg("两次密码输入错误", {icon: 5});
+            }
         }
     </script>
 {% endblock %}
