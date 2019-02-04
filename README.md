@@ -14,6 +14,6 @@
   使用了shellinabox实现了网页终端，改写了paramiko，用于记录运维的操作，做成日志
 # 项目展示
 ## 登录页面
-![login]("https://pan.baidu.com/s/1qEa4qc4BrDYhLl8q7R1BKA#list/path=%2Fgithub%E8%BF%9C%E7%A8%8B%E8%B5%84%E6%BA%90%2FMonitorSystem%2Fphoto")
+![login](https://thumbnail0.baidupcs.com/thumbnail/9017b8d67e7e25774119ba61a58cab35?fid=776928879-250528-809600106491195&time=1549252800&rt=sh&sign=FDTAER-DCb740ccc5511e5e8fedcff06b081203-TBtVAjOSw604WQWzlZlSu9q5g74%3D&expires=8h&chkv=0&chkbd=0&chkpc=&dp-logid=800349333684327134&dp-callid=0&size=c256_u256&quality=90&vuk=-&ft=video)
 
 
